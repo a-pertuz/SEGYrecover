@@ -1,10 +1,9 @@
-"""Dialog windows for SEGYRecover."""
 import os
 import math
-from PySide6.QtGui import QFont, QPixmap, QPen, QPainter, QColor, QPolygonF, QIntValidator
-from PySide6.QtCore import Qt, QPointF
+from PySide6.QtGui import QFont, QPixmap, QPen, QPainter, QColor, QPolygonF, QIntValidator, QIcon
+from PySide6.QtCore import Qt, QPointF, QSize
 from PySide6.QtWidgets import (QDialog, QVBoxLayout, QFormLayout, QHBoxLayout, QLabel, QLineEdit, 
-    QPushButton, QGroupBox, QMessageBox, QDialog, QApplication
+    QPushButton, QGroupBox, QMessageBox, QDialog, QApplication, QFrame, QToolButton, QSizePolicy
 )
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
@@ -29,15 +28,17 @@ class ParameterDialog(QDialog):
         window_width= int(screen_width * 0.3)
         window_height = int(screen_height * 0.85)
         self.setGeometry(pos_x, pos_y, window_width, window_height)
-
+        
 
         self.layout = QVBoxLayout(self)
+        self.layout.setSpacing(8)
+        self.layout.setContentsMargins(10, 10, 10, 10)
 
         # Define constants 
         self.POINT_CONFIGS = [
-            ("P1", "Top Left", (7.5, 7.5), "Top left corner coordinates"),
-            ("P2", "Top Right", (57.5, 7.5), "Top right corner coordinates"), 
-            ("P3", "Bottom Left", (7.5, 37.5), "Bottom left corner coordinates")
+            ("P1", "Top Left", (0, 0), "Top left corner coordinates"),
+            ("P2", "Top Right", (1, 0), "Top right corner coordinates"), 
+            ("P3", "Bottom Left", (0, 1), "Bottom left corner coordinates")
         ]
         
         self.FREQUENCY_PARAMS = [
@@ -59,142 +60,280 @@ class ParameterDialog(QDialog):
         self._create_acquisition_params()
         self._create_detection_params()
         
-        # Add accept button
-        self.accept_button = QPushButton("Accept", self)
+        # Add spacer before accept button
+        self.layout.addStretch(1)
+        
+        # Add accept button with improved styling
+        self.accept_button = QPushButton("Accept Parameters", self)
+        self.accept_button.setMinimumHeight(36)
+        self.accept_button.setStyleSheet("""
+            QPushButton {
+                background-color: #10b981;
+                color: white;
+                border: 1px solid #0da56f;
+                border-radius: 6px;
+                font-weight: bold;
+                font-size: 13px;
+            }
+            QPushButton:hover {
+                background-color: #13d194;
+            }
+        """)
         self.accept_button.clicked.connect(self.accept)
         self.layout.addWidget(self.accept_button)
 
+
+
     def _create_point_inputs(self):
-        """Create input fields for ROI point coordinates."""
-        for point_id, label, dot_pos, tooltip in self.POINT_CONFIGS:
-            # Create group box with tooltips
-            group = QGroupBox(f"{point_id} - {label}", self)
-            group.setFont(QFont("", -1, QFont.Bold))
-            group.setToolTip(tooltip)
-            layout = QFormLayout()
+        """Create compact input fields for ROI point coordinates."""
+        # Add section header
+        section_label = QLabel("Region of Interest Points", self)
+        section_label.setStyleSheet("font-weight: bold; font-size: 13px; color: #333333; margin-top: 6px;")
+        self.layout.addWidget(section_label)
+        
+        # Create a container for all points with compact layout
+        points_container = QGroupBox()
+        points_container.setStyleSheet("margin-top: 0;")
+        points_layout = QVBoxLayout(points_container)
+        points_layout.setSpacing(4)
+        points_layout.setContentsMargins(6, 6, 6, 6)
+        
+        for point_id, label, dot_rel_pos, tooltip in self.POINT_CONFIGS:
+            # Create a horizontal layout for this point
+            point_layout = QHBoxLayout()
+            point_layout.setSpacing(8)
             
-            # Create Trace and TWT inputs
-            for param in ["Trace", "TWT"]:
-                input_field = QLineEdit(self)
-                input_field.setFixedWidth(50)
-                input_field.setValidator(QIntValidator())
-                layout.addRow(f"{param}_{point_id}:", input_field)
-                setattr(self, f"{param}_{point_id}", input_field)
-            
-            group.setLayout(layout)
-            
-            # Create horizontal layout with icon
-            h_layout = QHBoxLayout()
-            h_layout.addWidget(group)
-            
-            # Create and add icon
+            # Create diagram
             icon = QLabel(self)
-            pixmap = QPixmap(70, 50)
+            pixmap = QPixmap(60, 40)
             pixmap.fill(Qt.transparent)
-            painter = QPainter(pixmap)
-            painter.setPen(Qt.red)
-            painter.drawRect(10, 10, 50, 30)
-            painter.drawEllipse(dot_pos[0], dot_pos[1], 5, 5)
-            painter.end()
-            icon.setPixmap(pixmap)
-            h_layout.addWidget(icon)
             
-            self.layout.addLayout(h_layout)
+            painter = QPainter(pixmap)
+            painter.setRenderHint(QPainter.Antialiasing)
+            painter.setPen(QPen(QColor(200, 200, 200), 1))
+            painter.setBrush(QColor(245, 245, 245))
+            painter.drawRect(5, 5, 50, 30)
+            
+            corner_x = 5 if dot_rel_pos[0] == 0 else 55
+            corner_y = 5 if dot_rel_pos[1] == 0 else 35
+            painter.setPen(QPen(QColor(231, 76, 60), 1))
+            painter.setBrush(QColor(231, 76, 60))
+            painter.drawEllipse(corner_x - 3, corner_y - 3, 6, 6)
+            painter.setPen(QColor(50, 50, 50))
+            painter.drawText(corner_x + (5 if dot_rel_pos[0] == 0 else -12), corner_y + (12 if dot_rel_pos[1] == 0 else -5), point_id)
+            painter.end()
+            
+            icon.setPixmap(pixmap)
+            icon.setFixedSize(60, 40)
+            point_layout.addWidget(icon)
+            
+            # Create inputs horizontally aligned
+            inputs_widget = QGroupBox(f"{point_id} - {label}")
+            inputs_widget.setToolTip(tooltip)
+            inputs_layout = QHBoxLayout(inputs_widget)
+            inputs_layout.setSpacing(12)  
+            inputs_layout.setContentsMargins(6, 6, 6, 6)
+            
+            # Add Trace label and input
+            param_label = QLabel("Trace:", self)
+            param_label.setStyleSheet("font-weight: bold;")
+            input_field = QLineEdit(self)
+            input_field.setFixedWidth(50)
+            input_field.setValidator(QIntValidator())
+            input_field.setAlignment(Qt.AlignCenter)
+            inputs_layout.addWidget(param_label)
+            inputs_layout.addWidget(input_field)
+            setattr(self, f"Trace_{point_id}", input_field)
+            
+            # Adjust spacing between Trace input and TWT label
+            inputs_layout.addSpacing(80)  
+            
+            # Add TWT label and input
+            param_label = QLabel("TWT:", self)
+            param_label.setStyleSheet("font-weight: bold;")
+            input_field = QLineEdit(self)
+            input_field.setFixedWidth(50)
+            input_field.setValidator(QIntValidator())
+            input_field.setAlignment(Qt.AlignCenter)
+            inputs_layout.addWidget(param_label)
+            inputs_layout.addWidget(input_field)
+            setattr(self, f"TWT_{point_id}", input_field)
+            
+            point_layout.addWidget(inputs_widget)
+            point_layout.setStretchFactor(icon, 2)
+            point_layout.setStretchFactor(inputs_widget, 8)
+            points_layout.addLayout(point_layout)
+        
+        self.layout.addWidget(points_container)
 
     def _create_acquisition_params(self):
-        """Create acquisition parameter inputs."""
-        group = QGroupBox("Acquisition Parameters", self)
-        group.setFont(QFont("", -1, QFont.Bold))
-        layout = QFormLayout()
+        """Create compact acquisition parameter inputs."""
+        section_label = QLabel("Acquisition Parameters", self)
+        section_label.setStyleSheet("font-weight: bold; font-size: 13px; color: #333333; margin-top: 6px;")
+        self.layout.addWidget(section_label)
+        
+        group = QGroupBox("Signal Parameters", self)
+        group.setStyleSheet("margin-top: 0;")
+        layout = QVBoxLayout(group)
+        layout.setSpacing(6)
+        layout.setContentsMargins(10, 10, 10, 10)
         
         # Sample rate input
+        sample_layout = QHBoxLayout()
+        sample_layout.setSpacing(6)  # Reduced spacing for compactness
+        sample_label = QLabel("Sample Rate (ms):", self)
+        sample_label.setStyleSheet("font-weight: bold;")
         self.DT = QLineEdit(self)
         self.DT.setFixedWidth(50)
         self.DT.setValidator(QIntValidator())
-        self.DT.setToolTip("Sample rate in milliseconds")
-        layout.addRow("Sample Rate (ms):", self.DT)
+        self.DT.setAlignment(Qt.AlignCenter)
+        sample_layout.addWidget(sample_label)
+        sample_layout.addWidget(self.DT)
+        layout.addLayout(sample_layout)
         
         # Frequency band inputs
+        freq_label = QLabel("Frequency band (Hz):", self)
+        freq_label.setStyleSheet("font-weight: bold;")
+        layout.addWidget(freq_label)
+        
         freq_layout = QHBoxLayout()
-        freq_layout.addWidget(QLabel("Frequency band (Hz):"))
+        freq_layout.setSpacing(6)  # Reduced spacing for compactness
         
         for param_id, tooltip in self.FREQUENCY_PARAMS:
+            param_container = QVBoxLayout()
+            param_label = QLabel(param_id, self)
+            param_label.setAlignment(Qt.AlignCenter)
+            param_label.setStyleSheet("font-weight: bold; color: #333333; font-size: 10px;")
             input_field = QLineEdit(self)
-            input_field.setFixedWidth(30)
+            input_field.setFixedWidth(50)
             input_field.setValidator(QIntValidator())
+            input_field.setAlignment(Qt.AlignCenter)
             input_field.setToolTip(tooltip)
-            freq_layout.addWidget(input_field)
+            param_container.addWidget(param_label)
+            param_container.addWidget(input_field)
+            freq_layout.addLayout(param_container)
             setattr(self, param_id, input_field)
         
-        # Add frequency band diagram
+        # Add frequency band diagram with reduced spacing
         icon = self._create_freq_band_icon()
         freq_layout.addWidget(icon)
-        layout.addRow(freq_layout)
+        layout.addLayout(freq_layout)
         
-        group.setLayout(layout)
-        self.layout.addWidget(group)
-    
-    def _create_detection_params(self):
-        """Create timeline/baseline detection parameter inputs."""
-        group = QGroupBox("Timeline and Baseline Detection Parameters", self)
-        group.setFont(QFont("", -1, QFont.Bold))
-        layout = QFormLayout()
-        
-        # Basic parameters - first two parameters (TLT, HLT)
-        basic_params = self.DETECTION_PARAMS[:2]
-        for param_id, label, tooltip in basic_params:
-            input_field = QLineEdit(self)
-            input_field.setFixedWidth(50)
-            input_field.setValidator(QIntValidator())
-            input_field.setToolTip(tooltip)
-            layout.addRow(f"{label}:", input_field)
-            setattr(self, param_id, input_field)
-        
-        # Add Advanced Parameters label
-        advanced_label = QLabel("Advanced Parameters")
-        advanced_label.setFont(QFont("", -1, QFont.Bold))
-        advanced_label.setStyleSheet("color: #444; margin-top: 10px;")
-        layout.addRow(advanced_label, QLabel(""))
-        
-        # Advanced parameters - remaining parameters (HE, BDB, BDE, BFT)
-        advanced_params = self.DETECTION_PARAMS[2:]
-        for param_id, label, tooltip in advanced_params:
-            input_field = QLineEdit(self)
-            input_field.setFixedWidth(50)
-            input_field.setValidator(QIntValidator())
-            input_field.setToolTip(tooltip)
-            layout.addRow(f"{label}:", input_field)
-            setattr(self, param_id, input_field)
-        
-        group.setLayout(layout)
         self.layout.addWidget(group)
 
     def _create_freq_band_icon(self):
-        """Create frequency band diagram icon."""
+        """Create a compact frequency band diagram."""
         icon = QLabel(self)
-        pixmap = QPixmap(70, 50)
+        pixmap = QPixmap(80, 60)
         pixmap.fill(Qt.transparent)
         
         painter = QPainter(pixmap)
-        painter.setPen(Qt.red)
-        
-        # Draw trapezoid
-        points = [
-            QPointF(20, 10), QPointF(10, 40),
-            QPointF(60, 40), QPointF(50, 10)
-        ]
+        painter.setRenderHint(QPainter.Antialiasing)
+        painter.setPen(QPen(QColor(100, 100, 100), 1.5))
+        painter.drawLine(10, 45, 70, 45)  # X-axis
+        painter.drawLine(10, 10, 10, 45)  # Y-axis
+        painter.setPen(QColor(80, 80, 80))
+        painter.setFont(QFont("Arial", 7))
+        painter.drawText(35, 55, "Frequency")
+        painter.save()
+        painter.translate(5, 30)
+        painter.rotate(-90)
+        painter.drawText(0, 0, "Amplitude")
+        painter.restore()
+        painter.setPen(QPen(QColor(231, 76, 60), 1.5))
+        painter.setBrush(QColor(231, 76, 60, 80))
+        points = [QPointF(20, 15), QPointF(10, 45), QPointF(60, 45), QPointF(50, 15)]
         painter.drawPolygon(QPolygonF(points))
-        
-        # Add frequency labels
-        painter.setPen(QColor(0, 0, 0))
-        labels = [("F2", 10, 10), ("F1", 5, 40),
-                 ("F4", 55, 40), ("F3", 50, 10)]
-        for text, x, y in labels:
-            painter.drawText(x, y, text)
-        
         painter.end()
         icon.setPixmap(pixmap)
+        icon.setFixedSize(80, 60)
         return icon
+
+    def _create_detection_params(self):
+        """Create more compact timeline/baseline detection parameter inputs."""
+        # Add section header with less margin
+        section_label = QLabel("Detection Parameters", self)
+        section_label.setStyleSheet("font-weight: bold; font-size: 13px; color: #333333; margin-top: 6px;")
+        self.layout.addWidget(section_label)
+        
+        group = QGroupBox("Timeline and Baseline Detection", self)
+        group.setStyleSheet("margin-top: 0;")
+        layout = QFormLayout(group)
+        layout.setVerticalSpacing(6)
+        layout.setHorizontalSpacing(10)
+        layout.setContentsMargins(10, 10, 10, 10)
+        
+        # Basic parameters in a compact layout
+        basic_params = self.DETECTION_PARAMS[:2]
+        for param_id, label, tooltip in basic_params:
+            input_layout = QHBoxLayout()
+            input_layout.setSpacing(2)
+            
+            input_field = QLineEdit(self)
+            input_field.setFixedWidth(45)
+            input_field.setValidator(QIntValidator())
+            input_field.setAlignment(Qt.AlignCenter)
+            input_field.setToolTip(tooltip)
+            
+            input_layout.addWidget(input_field)
+            
+            input_layout.setStretchFactor(input_field, 5)
+            
+            param_label = QLabel(f"{label}:", self)
+            param_label.setStyleSheet("font-weight: bold;")
+            
+            layout.addRow(param_label, input_layout)
+            setattr(self, param_id, input_field)
+        
+        # Add Advanced Parameters section with full-width alignment
+        advanced_label = QLabel("Advanced Parameters", self)
+        advanced_label.setStyleSheet("font-weight: bold; color: #64748b; margin-top: 10px; margin-bottom: 2px; font-size: 11px;")
+        
+        # Add label to form layout to make it span full width 
+        layout.addRow(advanced_label, None)
+        
+        # Create frame for advanced parameters with proper alignment
+        advanced_frame = QFrame()
+        advanced_frame.setFrameShape(QFrame.StyledPanel)
+        advanced_frame.setStyleSheet("""
+            QFrame {
+                background-color: #f8fafc;
+                border: 1px dashed #d1d5db;
+                border-radius: 4px;
+            }
+        """)
+        advanced_layout = QFormLayout(advanced_frame)
+        advanced_layout.setVerticalSpacing(3)
+        advanced_layout.setHorizontalSpacing(8)
+        advanced_layout.setContentsMargins(8, 8, 8, 8)
+        
+        # Advanced parameters in a compact layout
+        advanced_params = self.DETECTION_PARAMS[2:]
+        for param_id, label, tooltip in advanced_params:
+            input_layout = QHBoxLayout()
+            input_layout.setSpacing(2)
+            
+            input_field = QLineEdit(self)
+            input_field.setFixedWidth(45)
+            input_field.setValidator(QIntValidator())
+            input_field.setAlignment(Qt.AlignCenter)
+            input_field.setToolTip(tooltip)
+            
+            input_layout.addWidget(input_field)
+            
+            input_layout.setStretchFactor(input_field, 5)
+            
+            param_label = QLabel(f"{label}:", self)
+            param_label.setStyleSheet("color: #475569; font-size: 11px;")
+            
+            advanced_layout.addRow(param_label, input_layout)
+            setattr(self, param_id, input_field)
+        
+        # Add advanced frame as a full width item (spanning both columns)
+        layout.addRow("", advanced_frame)
+        layout.setWidget(layout.rowCount()-1, QFormLayout.SpanningRole, advanced_frame)
+        
+        self.layout.addWidget(group)
 
     def get_parameters(self):
         """Return all parameters as a dictionary."""
@@ -307,7 +446,7 @@ class TimelineBaselineWindow(QDialog):
         # Set limits around the center
         y_min = max(0, y_center - y_half_range)
         y_max = min(height, y_center + y_half_range)
-        x_min = max(0, x_center - x_half_range)
+        x_min = max(0, min(x_center - x_half_range))
         x_max = min(width, x_center + x_half_range)
         
         # Set limits for all plots
@@ -967,18 +1106,7 @@ class CoordinateAssignmentDialog(QDialog):
         radio.setCheckable(True)
         radio.setChecked(selected)
         radio.setToolTip(tooltip)
-        radio.setStyleSheet("""
-            QPushButton {
-                text-align: left;
-                padding: 8px;
-                border: 1px solid #ccc;
-                border-radius: 5px;
-            }
-            QPushButton:checked {
-                background-color: #e7f5fd;
-                border: 2px solid #0078d7;
-            }
-        """)
+
         # Make the buttons in a group mutually exclusive
         radio.clicked.connect(lambda: self._handle_radio_click(radio))
         return radio

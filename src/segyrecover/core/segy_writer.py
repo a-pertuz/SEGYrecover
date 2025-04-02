@@ -6,7 +6,7 @@ from scipy.interpolate import interp1d
 import seisio
 from PySide6.QtWidgets import QDialog
 
-from segyrecover.ui.app_dialogs import CoordinateAssignmentDialog
+from ..ui.app_dialogs import CoordinateAssignmentDialog
 
 class SegyFileWriter:
     """Handles SEGY file creation, coordinate assignment, and writing"""

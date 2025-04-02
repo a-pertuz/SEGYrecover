@@ -1,5 +1,6 @@
 """Data processing functionality for SEGYRecover."""
 
+import os
 import numpy as np
 from scipy.interpolate import interp1d
 
@@ -33,6 +34,8 @@ class DataProcessor:
                 if self.progress.wasCanceled():
                     return None
 
+            self._save_array(resampled, "resampled")
+
             self.progress.finish()
             return resampled
             
@@ -65,6 +68,8 @@ class DataProcessor:
             # Fix NaN traces by interpolating from neighbors
             filtered = self._fix_nan_traces(filtered)
             
+            self._save_array(filtered, "filtered")
+
             self.progress.finish()
             return filtered
             
@@ -123,3 +128,22 @@ class DataProcessor:
                     data[:, i] = data[:, right_idx]
                     
         return data
+
+    def _save_array(self, array, name):
+            """Save intermediate amplitude data as NumPy array (.npy file)
+            
+            Args:
+                array: NumPy array containing the amplitude data
+                name: File name for the array
+            """
+            try:
+                # Save the NumPy array to the raw folder
+                save_dir = os.path.join(self.work_dir, "raw")
+                os.makedirs(save_dir, exist_ok=True)
+
+                file_path = os.path.join(save_dir, f"{name}.npy")
+                np.save(file_path, array)
+                
+                self.console.append(f"Saved {name} to {file_path}\n")
+            except Exception as e:
+                self.console.append(f"Error saving array {name}: {str(e)}\n")

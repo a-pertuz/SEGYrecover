@@ -3,6 +3,7 @@ import matplotlib
 matplotlib.use('QtAgg')
 import os
 import json
+import subprocess
 from PySide6.QtGui import QFont, QAction
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (QApplication, QStatusBar, QProgressBar, 
@@ -29,7 +30,7 @@ class ProgressStatusBar(QStatusBar):
     """Status bar with integrated progress bar."""
 
     def __init__(self, parent=None):
-        """Initialize the progress status bar."""
+        """Initialize the progress status bar.""" 
         super().__init__(parent)
         
         # Create progress bar
@@ -148,6 +149,13 @@ class SegyRecover(QMainWindow):
         set_dir_action.triggered.connect(self.set_base_directory)
         file_menu.addAction(set_dir_action)
         
+        # Open directory action
+        open_dir_action = QAction("Open Data Directory", self)
+        open_dir_action.setIcon(self.style().standardIcon(QStyle.SP_DirOpenIcon))
+        open_dir_action.setShortcut("Ctrl+O")
+        open_dir_action.triggered.connect(self.open_work_directory)
+        file_menu.addAction(open_dir_action)
+        
         # Help menu
         help_menu = menu_bar.addMenu("Help")
         
@@ -163,6 +171,25 @@ class SegyRecover(QMainWindow):
         about_action.setIcon(self.style().standardIcon(QStyle.SP_MessageBoxInformation))
         about_action.triggered.connect(self.show_about_dialog)
         help_menu.addAction(about_action)
+
+    def open_work_directory(self):
+        """Open the current work directory in the file explorer."""
+        try:
+            if os.path.exists(self.work_dir):
+                if os.name == 'nt':  # Windows
+                    os.startfile(self.work_dir)
+                elif os.name == 'posix':  # macOS and Linux
+                    if os.uname().sysname == 'Darwin':  # macOS
+                        subprocess.run(['open', self.work_dir])
+                    else:  # Linux
+                        subprocess.run(['xdg-open', self.work_dir])
+                info_message(self.console, f"Opened data directory: {self.work_dir}")
+            else:
+                QMessageBox.warning(self, "Directory Not Found", 
+                                   f"The directory {self.work_dir} does not exist.")
+        except Exception as e:
+            QMessageBox.warning(self, "Error", f"Could not open directory: {str(e)}")
+            info_message(self.console, f"Error opening directory: {str(e)}")
 
     def load_config(self):
         """Load configuration from file or create default."""
