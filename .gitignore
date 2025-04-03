@@ -30,3 +30,5 @@ htmlcov/
 
 # Documentation
 docs/_build/
+
+.tmp.driveupload/
