@@ -32,3 +32,4 @@ htmlcov/
 docs/_build/
 
 .tmp.driveupload/
+.tmp.drivedownload/
