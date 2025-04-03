@@ -390,28 +390,33 @@ class TimelineBaselineWindow(QDialog):
         ax1.set_title('Image with Timelines Removed')
 
         ax2.imshow(image_a, cmap='gray')
-        ax2.axhline(y=BDB, color='blue', linewidth=2, linestyle='--')
-        ax2.axhline(y=BDE, color='blue', linewidth=2, linestyle='--')
         ax2.set_title('Image with Baselines')
 
         ax3.imshow(image_m, cmap='gray')
         ax3.set_title('Debug Baseline Detection')
-        ax3.axhline(y=BDB, color='blue', linewidth=2, linestyle='--')
-        ax3.axhline(y=BDE, color='blue', linewidth=2, linestyle='--')
 
         ax4.imshow(image_f, cmap='gray')
         ax4.set_title('Timelines')
 
-        # Draw baselines
-        for baseline in final_baselines:
-            ax2.axvline(x=baseline, color='lime', linewidth=1)
+        try:            
+            for baseline in final_baselines:
+                ax2.axvline(x=baseline, color='lime', linewidth=1)
+            
+            for baseline in raw_baselines:
+                ax3.axvline(x=baseline, color='red', linewidth=1)
+            
+            for baseline in final_baselines:
+                if baseline not in raw_baselines:
+                    ax3.axvline(x=baseline, color='cyan', linewidth=1, linestyle='--')
+        except TypeError as e:
+            print(f"Error in baseline drawing: {e}")
         
-        for baseline in raw_baselines:
-            ax3.axvline(x=baseline, color='red', linewidth=1)
-
-        for baseline in final_baselines:
-            if baseline not in raw_baselines:
-                ax3.axvline(x=baseline, color='cyan', linewidth=1, linestyle='--')
+        try:
+            print(f"About to draw BDB/BDE. BDB: {BDB}, BDE: {BDE}")
+            ax3.axhline(y=BDB, color='yellow', linewidth=1)
+            ax3.axhline(y=BDE, color='yellow', linewidth=1)
+        except TypeError as e:
+            print(f"Error in BDB/BDE drawing: {e}")
 
         self._apply_initial_zoom([ax1, ax2, ax3, ax4], image_a.shape)
         toolbar_segyrec.update()
@@ -433,7 +438,7 @@ class TimelineBaselineWindow(QDialog):
         height, width = image_shape
         
         # Center-focused zoom without considering BDB and BDE
-        zoom_factor = 0.1  # Show 50% of the image in both dimensions
+        zoom_factor = 0.1  # Show 10% of the image in both dimensions
         
         # Calculate center point
         y_center = height // 2
@@ -446,7 +451,7 @@ class TimelineBaselineWindow(QDialog):
         # Set limits around the center
         y_min = max(0, y_center - y_half_range)
         y_max = min(height, y_center + y_half_range)
-        x_min = max(0, min(x_center - x_half_range))
+        x_min = max(0, x_center - x_half_range)
         x_max = min(width, x_center + x_half_range)
         
         # Set limits for all plots

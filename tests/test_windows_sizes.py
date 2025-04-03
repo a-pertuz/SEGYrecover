@@ -23,7 +23,9 @@ def main():
     
     # Get actual screen dimensions
     screen = QApplication.primaryScreen().geometry()
-    screen_width, screen_height = screen.width(), screen.height()
+    
+    screen_width = min(screen.width(), 1920)
+    screen_height = min(screen.height(), 1080)
     
     # Create Control Panel Window (left side)
     x_control = int(screen_width * 0.05)
@@ -38,9 +40,9 @@ def main():
     )
         
     # Create Image Window (top-center)
-    x_image = int(screen_width * 0.3 + 10)
+    x_image = int(screen_width * 0.3+10)
     y_image = int(screen_height * 0.05)
-    width_image = int(screen_width * 0.35)
+    width_image = int(screen_width * 0.6)
     height_image = int(screen_height * 0.4)
     image_window = create_window(
         "Image Window", 
@@ -50,10 +52,11 @@ def main():
     )
     
     # Create Location Window (top-right)
-    x_location = int(screen_width * 0.65 + 20)
-    y_location = int(screen_height * 0.05)
-    width_location = int(screen_width * 0.3)
+    x_location = int(screen_width * 0.3+10)
+    y_location = int(screen_height * 0.5)
+    width_location = int(screen_width * 0.6)
     height_location = int(screen_height * 0.4)
+
     location_window = create_window(
         "Location Window", 
         x_location, y_location, 
