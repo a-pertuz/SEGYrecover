@@ -16,8 +16,6 @@ import seisplot
 def display_segy_results(segy_path, parent=None):
     """Display SEGY section and amplitude spectrum."""
     try:
-
-
         # Get base name
         base_name = os.path.splitext(os.path.basename(segy_path))[0]
 
@@ -199,27 +197,29 @@ class ImageLoader:
 
         layout = QVBoxLayout(window)
 
-        fig = plt.figure()
+        fig = plt.figure(figsize=(12,8))
         self.plot_location_canvas = FigureCanvas(fig)
         ax = fig.add_subplot(111)
         ax.set_xlabel('UTM X')
         ax.set_ylabel('UTM Y')
         ax.grid(True)
-
+        fig.tight_layout(pad=2.0)
+        fig.subplots_adjust(left=0.08, right=0.95, bottom=0.15)  # Increased bottom margin
+        
         layout.addWidget(self.plot_location_canvas)
         layout.addWidget(NavigationToolbar(self.plot_location_canvas, window))
-
+        
         window.show()
         return window
-
+        
     def _load_geometry_data(self, base_name):
         """Load and display geometry data"""
         geometry_file = os.path.join(self.work_dir, 'GEOMETRY', f'{base_name}.geometry')
-
+        
         if not os.path.exists(geometry_file):
             self.console.append("Geometry file not found.\n")
             return False
-
+            
         try:
             cdp, x, y = [], [], []
             with open(geometry_file, 'r') as file:
@@ -228,10 +228,8 @@ class ImageLoader:
                     cdp.append(parts[0])
                     x.append(float(parts[1]))
                     y.append(float(parts[2]))
-
             ax = self.plot_location_canvas.figure.get_axes()[0]        
             ax.plot(x, y, marker='o', markersize=2, color='red', linestyle='-')
-
             # Add labels with threshold to avoid overcrowding
             threshold = 1000
             annotated_positions = []
@@ -241,14 +239,15 @@ class ImageLoader:
                       for p in annotated_positions):
                     ax.annotate(txt, position)
                     annotated_positions.append(position)
-
             ax.set_title(f"COORDINATES \"{base_name}\"")
-            ax.set_aspect('equal', adjustable='box')
+            ax.set_aspect('equal', adjustable='datalim')  # Changed from 'box' to 'datalim'
+            # Rotate x-axis labels to prevent overlap
+            plt.setp(ax.get_xticklabels(), rotation=45, ha='right')
+            # Apply tight layout again after plotting to optimize space
+            self.plot_location_canvas.figure.tight_layout()
             self.plot_location_canvas.draw()
             return True
 
         except Exception as e:
             self.console.append(f"<span style='color:red'>Error loading geometry: {str(e)}</span>\n")
-            self.console.append(f"<span style='color:red'>At least the first and last point in the seismic section needs to be georeferenced</span>\n")
             return False
-
