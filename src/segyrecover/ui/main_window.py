@@ -6,9 +6,10 @@ import json
 import subprocess
 from PySide6.QtGui import QFont, QAction
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import (QApplication, QStatusBar, QProgressBar, 
-                               QVBoxLayout, QLabel, QPushButton, QMessageBox, 
-    QWidget, QTextEdit, QStyle, QDialog, QFileDialog, QMainWindow
+from PySide6.QtWidgets import (
+    QApplication, QStatusBar, QProgressBar, QVBoxLayout, QLabel, 
+    QPushButton, QMessageBox, QWidget, QTextEdit, QStyle, QDialog, 
+    QFileDialog, QMainWindow, QSplitter, QHBoxLayout
 )
 
 import appdirs
@@ -16,15 +17,21 @@ import appdirs
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 import matplotlib.pyplot as plt
 
-
 from .help_dialogs import HelpDialog, FirstRunDialog, AboutDialog
-from .image_viewer import ImageLoader
-from .workflow import load_image, input_parameters, select_area, initialize
 from ..utils.resource_utils import copy_tutorial_files
 from ..utils.console_utils import (
-    section_header, info_message, initialize_log_file, close_log_file
+    section_header, info_message, initialize_log_file, close_log_file, error_message
 )
 
+# Imports for the tabbed interface
+from .navigation_panel import NavigationPanel
+from .tab_container import TabContainer
+from ._0_welcome_tab import WelcomeTab
+from ._1_load_image_tab import LoadImageTab
+from ._2_parameters_tab import ParametersTab
+from ._3_roi_selection_tab import ROISelectionTab
+from ._4_digitization_tab import DigitizationTab
+from ._5_results_tab import ResultsTab
 
 class ProgressStatusBar(QStatusBar):
     """Status bar with integrated progress bar."""
@@ -32,15 +39,18 @@ class ProgressStatusBar(QStatusBar):
     def __init__(self, parent=None):
         """Initialize the progress status bar.""" 
         super().__init__(parent)
+        self.setObjectName("status_bar")
         
         # Create progress bar
         self.progress_bar = QProgressBar()
+        self.progress_bar.setObjectName("progress_bar")
         self.progress_bar.setVisible(False)
         self.progress_bar.setMaximumHeight(15)
         self.progress_bar.setMaximumWidth(200)
         
         # Create cancel button
         self.cancel_button = QPushButton()
+        self.cancel_button.setObjectName("cancel_button")
         self.cancel_button.setIcon(self.style().standardIcon(QStyle.SP_DialogCancelButton))
         self.cancel_button.setVisible(False)
         self.cancel_button.clicked.connect(self.cancel)
@@ -84,9 +94,10 @@ class SegyRecover(QMainWindow):
     
     def __init__(self, parent=None):
         super().__init__(parent)
+        self.setObjectName("main_window")
         
-        # Make window dimensions consistent - use 400x800 for both fixed size and minimum size
-        self.setFixedSize(400, 800)
+        # Make window dimensions consistent with bigger size for the tabbed UI
+        self.setMinimumSize(1200, 800)
         
         # Get appropriate directories for user data and config
         self.app_name = "SEGYRecover"
@@ -99,45 +110,246 @@ class SegyRecover(QMainWindow):
         
         self.load_config()
         
+        # Initialize state variables
         self.image_path = None
         self.img_array = None
         self.points = []
-        self.image_canvas = None
-        self.plot_location_canvas = None
+        self.rectified_image = None
+        self.binary_rectified_image = None
+        self.parameters = {}
+        self.image_canvas = None  # Initialize this here for the initialize call below
         
         self.create_required_folders()
 
+        # Initialize the central widget with a horizontal layout
         self.central_widget = QWidget()
+        self.central_widget.setObjectName("central_widget")
         self.setCentralWidget(self.central_widget)
+        
+        # Main horizontal layout
+        main_layout = QHBoxLayout(self.central_widget)
+        main_layout.setContentsMargins(0, 0, 0, 0)
+        main_layout.setSpacing(0)
 
         self.create_menu_bar()
         
-        self.setup_ui()
+        # Create navigation panel and add to main layout
+        self.navigation_panel = NavigationPanel()
+        self.navigation_panel.setObjectName("navigation_panel")
+        self.navigation_panel.navigationChanged.connect(self.handle_navigation_change)
+        main_layout.addWidget(self.navigation_panel)
+        
+        # Create container for main content (tabs + console)
+        content_container = QWidget()
+        content_container.setObjectName("content_container")
+        content_layout = QHBoxLayout(content_container)
+        content_layout.setContentsMargins(10, 10, 10, 10)
+        content_layout.setSpacing(0)
+        
+        # Create tab container
+        self.tab_container = TabContainer()
+        self.tab_container.setObjectName("tab_container")
+        content_layout.addWidget(self.tab_container, 1)  # 1 = stretch factor
+        
+        # Create and add console
+        self.console = QTextEdit()
+        self.console.setObjectName("console")  
+        self.console.setReadOnly(True)
+        self.console.setLineWrapMode(QTextEdit.WidgetWidth) 
+        content_layout.addWidget(self.console)
+        
+        # Add content container to main layout
+        main_layout.addWidget(content_container, 1)  # 1 = stretch factor
+        
+        # Create the progress bar as the main window's status bar
+        self.progress = ProgressStatusBar()
+        self.setStatusBar(self.progress)
         
         # Initialize log file
         self.log_file_path = initialize_log_file(self.work_dir)
         if self.log_file_path:
             info_message(self.console, f"Log file created: {os.path.basename(self.log_file_path)}")
         
-        self.image_loader = ImageLoader(
-            parent=self,
-            console=self.console,
-            work_dir=self.work_dir
-        )
+
         
+        # Create matplotlib figure for the image canvas
         figure = plt.figure()
         self.image_canvas = FigureCanvas(figure)
         
-        self.roi_manager = initialize(
-            self.progress, 
-            self.console, 
-            self.work_dir,
-            self.image_canvas
-        )
+
         
+        # Initialize tabs
+        self.initialize_tabs()
+        
+        # Show current directory in console with improved formatting
+        section_header(self.console, "INITIALIZATION")
+        info_message(self.console, f"Data directory: {self.work_dir}")
+        info_message(self.console, "Application ready")
+        
+        # Initialize with the welcome tab
+        self.navigation_panel.set_active("welcome")
+        self.tab_container.switch_to("welcome")
+        
+        # Disable tabs that require prior steps
+        self.navigation_panel.enable_tabs_until("welcome")
+    
+    def handle_navigation_change(self, identifier):
+        """Handle navigation changes from the side panel."""
+        self.tab_container.switch_to(identifier)
+    
+    def initialize_tabs(self):
+        """Initialize all the tab content."""
+        # Welcome tab
+        welcome_tab = WelcomeTab()
+        welcome_tab.newLineRequested.connect(self.start_new_line)
+        self.tab_container.add_tab("welcome", welcome_tab)
+        
+        # Load Image tab
+        load_image_tab = LoadImageTab(self.console, self.work_dir)
+        load_image_tab.imageLoaded.connect(self.handle_image_loaded)
+        load_image_tab.proceedRequested.connect(lambda: self.proceed_to_tab("parameters"))
+        self.tab_container.add_tab("load_image", load_image_tab)
+        
+        # Parameters tab
+        parameters_tab = ParametersTab(self.console, self.work_dir)
+        parameters_tab.parametersSet.connect(self.handle_parameters_set)
+        parameters_tab.proceedRequested.connect(lambda: self.proceed_to_tab("roi_selection"))
+        self.tab_container.add_tab("parameters", parameters_tab)
+        
+        # ROI Selection tab
+        roi_selection_tab = ROISelectionTab(self.console, self.work_dir)
+        roi_selection_tab.roiSelected.connect(self.handle_roi_selected)
+        roi_selection_tab.proceedRequested.connect(lambda: self.proceed_to_tab("digitization"))
+        self.tab_container.add_tab("roi_selection", roi_selection_tab)
+        
+        # Digitization tab
+        digitization_tab = DigitizationTab(self.console, self.progress, self.work_dir)
+        digitization_tab.digitizationCompleted.connect(self.handle_digitization_completed)
+        digitization_tab.proceedRequested.connect(lambda: self.proceed_to_tab("results"))
+        self.tab_container.add_tab("digitization", digitization_tab)
+        
+        # Results tab
+        results_tab = ResultsTab(self.console, self.work_dir)
+        results_tab.newLineRequested.connect(self.start_new_line)
+        self.tab_container.add_tab("results", results_tab)
+    
+    def start_new_line(self):
+        """Start a new seismic line processing workflow."""
+        # Reset state
+        self.image_path = None
+        self.img_array = None
+        self.points = []
+        self.rectified_image = None
+        self.binary_rectified_image = None
+        self.parameters = {}
+        
+        # Get the LoadImageTab and explicitly reset it
+        load_image_tab = self.tab_container.widget(self.tab_container.tab_indices["load_image"])
+        if hasattr(load_image_tab, "reset"):
+            load_image_tab.reset()
+        
+        # Switch to load image tab and enable only this step
+        self.proceed_to_tab("load_image")
+        self.navigation_panel.enable_tabs_until("load_image")
+        
+        # Clear console
+        self.console.clear()
+        section_header(self.console, "NEW LINE STARTED")
+        info_message(self.console, "Please load a seismic image")
+    
+    def proceed_to_tab(self, tab_id):
+        """Switch to specified tab and update navigation."""
+        self.tab_container.switch_to(tab_id)
+        self.navigation_panel.set_active(tab_id)
+        
+        # Special handling for specific tabs
+        if tab_id == "parameters" and self.image_path:
+            # Auto-load parameters if an image is loaded
+            params_tab = self.tab_container.widget(self.tab_container.tab_indices["parameters"])
+            if hasattr(params_tab, "load_parameters"):
+                params_tab.load_parameters(self.image_path)
+                # Next button should be disabled until parameters are saved
+        
+        elif tab_id == "roi_selection" and self.image_path is not None and self.img_array is not None:
+            # Update ROI tab with image data
+            roi_tab = self.tab_container.widget(self.tab_container.tab_indices["roi_selection"])
+            if hasattr(roi_tab, "update_with_image"):
+                roi_tab.update_with_image(self.image_path, self.img_array)
+        
+        elif tab_id == "digitization" and self.binary_rectified_image is not None and self.parameters:
+            # Update digitization tab with necessary data
+            digitization_tab = self.tab_container.widget(self.tab_container.tab_indices["digitization"])
+            if hasattr(digitization_tab, "update_with_data"):
+                digitization_tab.update_with_data(
+                    self.image_path,
+                    self.binary_rectified_image,
+                    self.parameters
+                )
+    
+    def handle_image_loaded(self, image_path, img_array):
+        """Handle image loaded signal from LoadImageTab."""
+        self.image_path = image_path
+        self.img_array = img_array
+        
+        # Enable navigation to next step
+        self.navigation_panel.enable_tabs_until("parameters")
+    
+    def handle_parameters_set(self, parameters):
+        """Handle parameters set signal from ParametersTab."""
+        self.parameters = parameters
+        
+        # Debug output to help diagnose issues
+        info_message(self.console, f"Parameters set: {len(parameters)} parameters")
+        
+        # Enable navigation to next step
+        self.navigation_panel.enable_tabs_until("roi_selection")
+    
+    def handle_roi_selected(self, points, binary_rectified_image=None):
+        """Handle ROI selected signal from ROISelectionTab."""
+        self.points = points
+        
+        # Get the ROI tab to access rectified image
+        roi_tab = self.tab_container.widget(self.tab_container.tab_indices["roi_selection"])
+        
+        # Use the binary_rectified_image directly from the signal if provided
+        if binary_rectified_image is not None:
+            self.binary_rectified_image = binary_rectified_image
+            info_message(self.console, "Received binary rectified image directly from ROI selection")
+        # Fall back to the tab property if signal parameter isn't available
+        elif hasattr(roi_tab, "binary_rectified_image") and roi_tab.binary_rectified_image is not None:
+            self.binary_rectified_image = roi_tab.binary_rectified_image
+            info_message(self.console, "Retrieved binary rectified image from ROI tab")
+        else:
+            error_message(self.console, "Binary rectified image is not available")
+            return
+            
+        # Get the rectified image (not binary) if available
+        if hasattr(roi_tab, "rectified_image"):
+            self.rectified_image = roi_tab.rectified_image
+        
+        # Output debug information to console
+        info_message(self.console, f"ROI selected: {len(points)} points")
+        if self.binary_rectified_image is not None:
+            binary_shape = self.binary_rectified_image.shape
+            info_message(self.console, f"Binary rectified image shape: {binary_shape[1]}x{binary_shape[0]} pixels")
+        
+        # Enable navigation to next step
+        self.navigation_panel.enable_tabs_until("digitization")
+    
+    def handle_digitization_completed(self, segy_path, filtered_data):
+        """Handle digitization completed signal from DigitizationTab."""
+        # Enable navigation to next step
+        self.navigation_panel.enable_tabs_until("results")
+        
+        # Update results tab with data
+        results_tab = self.tab_container.widget(self.tab_container.tab_indices["results"])
+        if hasattr(results_tab, "display_results"):
+            results_tab.display_results(segy_path, filtered_data, self.parameters["DT"])
+    
     def create_menu_bar(self):
         """Create the menu bar with file and help menus."""
         menu_bar = self.menuBar()
+        menu_bar.setObjectName("menu_bar")
         
         # File menu
         file_menu = menu_bar.addMenu("File")
@@ -258,74 +470,6 @@ class SegyRecover(QMainWindow):
                 self.console.append(f"Error saving configuration: {str(e)}")
             else:
                 print(f"Error saving configuration: {str(e)}")
-
-    def setup_ui(self):
-        """Set up the user interface."""
-        layout = QVBoxLayout()
-        layout.setContentsMargins(15, 10, 15, 15)  # Left, top, right, bottom
-        # Title with smaller font
-        title_label = QLabel("SEGYRECOVER", self.central_widget)
-        title_label.setFont(QFont("Arial", 18, QFont.Bold))  
-        title_label.setAlignment(Qt.AlignCenter)
-        layout.addWidget(title_label)
-        layout.addSpacing(10)
-
-        # Load Image button
-        self.load_button = QPushButton("Load Image", self.central_widget)
-        self.load_button.setIcon(self.style().standardIcon(QStyle.SP_DirOpenIcon))
-        self.load_button.clicked.connect(lambda: load_image(self))
-        layout.addWidget(self.load_button)
-
-        # Parameters button
-        self.param_button = QPushButton("Parameters", self.central_widget)
-        self.param_button.setIcon(self.style().standardIcon(QStyle.SP_FileDialogDetailedView))
-        self.param_button.setEnabled(False)
-        self.param_button.clicked.connect(lambda: input_parameters(self))
-        layout.addWidget(self.param_button)
-
-        # Begin Digitization button
-        self.begin_digitization_button = QPushButton("Begin Digitization", self.central_widget)
-        self.begin_digitization_button.setIcon(self.style().standardIcon(QStyle.SP_DialogSaveButton))
-        self.begin_digitization_button.setEnabled(False)
-        self.begin_digitization_button.clicked.connect(lambda: select_area(self))
-        layout.addWidget(self.begin_digitization_button)
-
-        self.load_button.setToolTip("Load a seismic image file (TIF, JPEG, PNG)")
-        self.param_button.setToolTip("Configure processing parameters")
-        self.begin_digitization_button.setToolTip("Start digitization process") 
-
-        layout.addSpacing(8)
-
-        # Create the progress bar as the main window's status bar
-        self.progress = ProgressStatusBar()
-        layout.addWidget(self.progress)
-
-        layout.addSpacing(8)  
-
-        console_label = QLabel("CONSOLE OUTPUT", self.central_widget)
-        console_label.setFont(QFont("Arial", 10, QFont.Bold))
-        layout.addWidget(console_label)
-
-        self.console = QTextEdit(self.central_widget)
-        self.console.setStyleSheet("font-family: 'Consolas', 'Courier New'; font-size: 9pt;")
-        self.console.setReadOnly(True)
-        self.console.setLineWrapMode(QTextEdit.WidgetWidth) 
-        self.console.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-        layout.addWidget(self.console)
-
-        layout.addSpacing(10)
-        
-        restart_button = QPushButton("Restart Process", self.central_widget)
-        restart_button.setIcon(self.style().standardIcon(QStyle.SP_BrowserReload))
-        restart_button.clicked.connect(self.restart_process)
-        layout.addWidget(restart_button)
-
-        self.central_widget.setLayout(layout)
-        
-        # Show current directory in console with improved formatting
-        section_header(self.console, "INITIALIZATION")
-        info_message(self.console, f"Data directory: {self.work_dir}")
-        info_message(self.console, "Application ready")
              
     def set_base_directory(self):
         """Let the user choose the base directory for data storage."""
@@ -349,18 +493,7 @@ class SegyRecover(QMainWindow):
 
             copy_tutorial_files(self.work_dir)
             
-            # Update image loader with new directory
-            if hasattr(self, 'image_loader'):
-                self.image_loader.work_dir = self.work_dir
                 
-            # Re-initialize the workflow module with the new directory
-            self.roi_manager = initialize(
-                self.progress, 
-                self.console, 
-                self.work_dir,
-                self.image_canvas
-            )
-            
             # Ask if user wants to copy existing data if we had a previous directory
             if os.path.exists(old_work_dir) and old_work_dir != self.work_dir:
                 reply = QMessageBox.question(
@@ -413,30 +546,27 @@ class SegyRecover(QMainWindow):
         reply = QMessageBox.question(
             self, 
             "Restart Process",
-            "Are you sure you want to restart?\nAll windows will be closed.",
+            "Are you sure you want to restart?\nAll unsaved progress will be lost.",
             QMessageBox.Yes | QMessageBox.No
         )
         
         if reply == QMessageBox.Yes:
-            # Close all popup windows
-            for child in self.findChildren(QDialog):
-                child.close()
-                
             # Reset state
             self.image_path = None
             self.img_array = None
             self.points = []
+            self.rectified_image = None
+            self.binary_rectified_image = None
+            self.parameters = {}
             
-            # Reset buttons
-            self.param_button.setEnabled(False)
-            self.begin_digitization_button.setEnabled(False)
+            # Go back to welcome tab
+            self.tab_container.switch_to("welcome")
+            self.navigation_panel.set_active("welcome")
+            self.navigation_panel.enable_tabs_until("welcome")
             
             # Clear console
             self.console.clear()
-            self.console.append("Application restarted. Please load a new image.\n")
-            
-            # Re-enable load button
-            self.load_button.setEnabled(True)
+            info_message(self.console, "Application restarted. Please start a new line.")
 
     def create_required_folders(self):
         """Create the necessary folder structure for the application."""

@@ -56,6 +56,7 @@ class AmplitudeExtractor:
         try:
             # 1. Replace zeros with trace means
             processed = self._interpolate_zeros(amplitude)
+            #processed = self._subtract_trace_mean(amplitude)
             if processed is None:
                 return None
             self._save_array(processed, "amplitude_zeros_interpolated")
@@ -79,6 +80,28 @@ class AmplitudeExtractor:
             self.console.append(f"Error processing amplitudes: {str(e)}\n")
             return None
 
+    def _subtract_trace_mean(self, amplitude):
+        """Subtract the trace mean from all values in the trace"""
+        self.console.append("Subtracting trace mean from all values...\n")
+        self.progress.start("Subtracting trace mean...", amplitude.shape[1])
+
+        try:
+            processed = amplitude.copy()
+            for i in range(processed.shape[1]):
+                trace_mean = np.mean(processed[:, i])
+                processed[:, i] -= trace_mean
+                self.progress.update(i)
+
+                if self.progress.wasCanceled():
+                    return None
+
+            self.progress.finish()
+            return processed
+
+        except Exception as e:
+            self.console.append(f"Error subtracting trace mean: {str(e)}\n")
+            return None
+
     def _interpolate_zeros(self, amplitude):
         """Replace zero values with trace means"""
         self.console.append("Interpolating zero values...\n")
@@ -90,7 +113,7 @@ class AmplitudeExtractor:
 
             for i in range(processed.shape[1]):
                 zero_indices = processed[:, i] == 0
-                processed[zero_indices, i] = -trace_means[i]
+                processed[zero_indices, i] = -(2*trace_means[i])
                 self.progress.update(i)
                 
                 if self.progress.wasCanceled():

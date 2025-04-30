@@ -206,14 +206,17 @@ class ImageProcessor:
     def _erosion_left(self, image, px):
         for row in image:
             transitions = np.where((row[:-1] == 255) & (row[1:] == 0))[0]
-            for i in transitions:
-                row[i:i+px+1] = 255
+            if len(transitions) > 0:
+                for i in transitions[1:]:  # Process all except the first one
+                    row[i:i+px+1] = 255
 
     def _erosion_right(self, image, px):
+        width = image.shape[1]
         for row in image:
             transitions = np.where((row[1:] == 255) & (row[:-1] == 0))[0]
-            for i in transitions:
-                row[max(0, i-px+1):i+1] = 255
+            if len(transitions) > 0:
+                for i in transitions[:-1]:  # Process all except the last one
+                    row[max(0, i-px+1):i+1] = 255
 
     def _erosion_top(self, image, px):
         for col in range(image.shape[1]):
