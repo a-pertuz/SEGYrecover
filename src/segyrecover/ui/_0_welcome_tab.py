@@ -9,11 +9,8 @@ from PySide6.QtWidgets import (
 )
 from .help_dialogs import AboutDialog, HelpDialog
 
-# Fix the import path for version
-try:
-    from .. import __version__
-except ImportError:
-    __version__ = "1.1.3"  # Fallback version
+from .. import __version__
+
 
 class WelcomeTab(QWidget):
     """Welcome tab with application information and start button."""
@@ -31,31 +28,19 @@ class WelcomeTab(QWidget):
         # Main layout
         layout = QVBoxLayout(self)
         layout.setContentsMargins(20, 20, 20, 20)
-        layout.setSpacing(15)
         
         # Header section with logo placeholder and buttons
         header_container = QWidget()
         header_layout = QHBoxLayout(header_container)
         header_layout.setContentsMargins(0, 0, 0, 0)
-        header_layout.setSpacing(0)
         
-        # Logo placeholder - replace this with your actual logo
-        logo_label = QLabel()
-        logo_label.setObjectName("logo_label")
-        # Create a placeholder logo
-        logo_pixmap = QPixmap(120, 120)
-        logo_pixmap.fill(Qt.transparent)
-        logo_label.setPixmap(logo_pixmap)
-        logo_label.setAlignment(Qt.AlignCenter)
-        header_layout.addWidget(logo_label)
         
         # Title and version in center
         title_container = QWidget()
         title_layout = QVBoxLayout(title_container)
-        title_layout.setSpacing(2)
         
         header = QLabel("SEGYRecover")
-        header.setObjectName("header_label")
+        header.setObjectName("title_label")
         header.setAlignment(Qt.AlignCenter)
         title_layout.addWidget(header)
         

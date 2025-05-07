@@ -165,11 +165,8 @@ class HelpDialog(QDialog):
             "<h4 style='margin-top: 10px; margin-bottom: 6px;'>Navigation Toolbar</h4>"
             "<ul style='margin-top: 0px;'>"
             "<li>🏠 <b>Home:</b> Reset view to original display</li>"
-            "<li>⬅️ <b>Back:</b> Previous view</li>"
-            "<li>➡️ <b>Forward:</b> Next view</li>"
             "<li>✋ <b>Pan:</b> Left click and drag to move around</li>"
             "<li>🔍 <b>Zoom:</b> Left click and drag to zoom into a rectangular region</li>"
-            "<li>⚙️ <b>Configure:</b> Configure plot settings</li>"
             "<li>💾 <b>Save:</b> Save the figure</li>"
             "</ul>"
         )

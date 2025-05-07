@@ -140,6 +140,15 @@ QLabel[objectName="header_label"] {
     margin-bottom: 5px;
 }
 
+QLabel[objectName="title_label"] {
+    font-size: 24pt;
+    font-weight: bold;
+    color: #1a202c;
+    margin-bottom: 10px;
+    padding: 5px 0;
+    text-align: center;
+}
+
 /* Section titles for all tabs */
 QLabel[objectName="section_label"] {
     font-size: 14pt;

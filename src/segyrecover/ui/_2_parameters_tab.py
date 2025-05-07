@@ -34,6 +34,12 @@ class ParametersTab(QWidget):
             ("P3", "Bottom Left", (0, 1), "Bottom left corner coordinates")
         ]
         
+        # Define linked parameters for autofill
+        self.LINKED_PARAMS = {
+            "Trace_P1": "Trace_P3",  # Left edge alignment
+            "TWT_P1": "TWT_P2"       # Top edge alignment
+        }
+        
         self.FREQUENCY_PARAMS = [
             ("F1", "Low cut-off"), ("F2", "Low pass"),
             ("F3", "High pass"), ("F4", "High cut-off")
@@ -70,6 +76,15 @@ class ParametersTab(QWidget):
         instruction.setWordWrap(True)
         instruction.setObjectName("description_label")
         main_layout.addWidget(instruction)
+        
+        # Autofill explanation 
+        autofill_notice = QLabel(
+            "Note: Trace_P3 will automatically match Trace_P1, and TWT_P2 will match TWT_P1 to maintain rectangular ROI shape."
+        )
+        autofill_notice.setWordWrap(True)
+        autofill_notice.setObjectName("autofill_notice")
+        autofill_notice.setStyleSheet("color: #2563EB; font-style: italic; margin-bottom: 5px;")
+        main_layout.addWidget(autofill_notice)
         
         # Create scroll area with better styling
         scroll_area = QScrollArea()
@@ -199,6 +214,13 @@ class ParametersTab(QWidget):
             trace_input.setAlignment(Qt.AlignCenter)
             trace_input.setObjectName(f"trace_input_{point_id}")
             
+            # Check if this is a linked parameter that should be auto-filled
+            is_trace_linked = f"Trace_{point_id}" in self.LINKED_PARAMS.values()
+            if is_trace_linked:
+                trace_input.setReadOnly(True)
+                trace_input.setStyleSheet("background-color: #EFF6FF; border: 1px solid #3B82F6;")
+                trace_input.setToolTip(f"Auto-filled from Trace_P1")
+            
             trace_label = QLabel("Trace:", self)
             trace_label.setObjectName("input_label")
             trace_label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)  # Center vertically with input
@@ -212,6 +234,13 @@ class ParametersTab(QWidget):
             twt_input.setValidator(QIntValidator())
             twt_input.setAlignment(Qt.AlignCenter)
             twt_input.setObjectName(f"twt_input_{point_id}")
+            
+            # Check if this is a linked parameter that should be auto-filled
+            is_twt_linked = f"TWT_{point_id}" in self.LINKED_PARAMS.values()
+            if is_twt_linked:
+                twt_input.setReadOnly(True)
+                twt_input.setStyleSheet("background-color: #EFF6FF; border: 1px solid #3B82F6;")
+                twt_input.setToolTip(f"Auto-filled from TWT_P1")
             
             twt_label = QLabel("TWT (ms):", self)
             twt_label.setObjectName("input_label")
@@ -230,6 +259,9 @@ class ParametersTab(QWidget):
         
         # Add the horizontal layout with all points to the main layout
         parent_layout.addLayout(all_points_layout)
+        
+        # Set up event handlers for linked parameters after all inputs are created
+        self._setup_linked_parameter_handlers()
     
     def _create_acquisition_params(self, parent_layout):
         """Create acquisition parameter inputs."""
@@ -587,3 +619,21 @@ class ParametersTab(QWidget):
             params[param_id] = int(getattr(self, param_id).text())
             
         return params
+
+    def _setup_linked_parameter_handlers(self):
+        """Set up event handlers to synchronize linked parameter values."""
+        # For each source parameter, set up connection to update the linked target
+        for source_param, target_param in self.LINKED_PARAMS.items():
+            source_field = getattr(self, source_param)
+            target_field = getattr(self, target_param)
+            
+            # Create a separate function to avoid lambda capture issues
+            def create_updater(target):
+                return lambda text: target.setText(text)
+            
+            # Connect textChanged signal from source to update target
+            source_field.textChanged.connect(create_updater(target_field))
+            
+            # Initialize target with source value on setup
+            if source_field.text():
+                target_field.setText(source_field.text())
