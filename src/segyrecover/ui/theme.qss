@@ -622,6 +622,51 @@ QRadioButton, QCheckBox {
 QRadioButton:disabled, QCheckBox:disabled {
     color: #a0aec0;
 }
+QRadioButton::indicator {
+    width: 16px;
+    height: 16px;
+    border: 1px solid #cbd5e0;
+    border-radius: 8px;
+    background-color: #ffffff;
+}
+
+QRadioButton::indicator:checked {
+    background-color: #ffffff;
+    border: 1px solid #3182ce;
+}
+
+QRadioButton::indicator:checked::after {
+    content: "";
+    display: block;
+    width: 8px;
+    height: 8px;
+    border-radius: 4px;
+    background-color: #3182ce;
+    position: absolute;
+    top: 4px;
+    left: 4px;
+}
+
+QRadioButton::indicator:hover {
+    border-color: #2b6cb0;
+}
+
+QRadioButton::indicator:disabled {
+    background-color: #e2e8f0;
+    border-color: #cbd5e0;
+}
+
+QRadioButton::indicator:checked:disabled {
+    background-color: #e2e8f0;
+}
+
+QRadioButton::indicator:checked:disabled::after {
+    background-color: #a0aec0;
+}
+
+QRadioButton:hover {
+    color: #2b6cb0;
+}
 
 #overlay_checkbox {
     spacing: 6px;

@@ -1,4 +1,4 @@
-"""Data processing functionality for SEGYRecover."""
+"""Amplitude processing functionality for SEGYRecover."""
 
 import os
 import numpy as np

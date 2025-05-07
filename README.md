@@ -3,8 +3,13 @@
 A Python tool for digitizing scanned seismic sections and converting them to standard SEGY format. SEGYRecover automatically detects trace lines and timelines, extracts amplitude information, and produces usable geophysical data files for modern interpretation software.
 
 [![DOI](https://zenodo.org/badge/DOI/zenodo.15053412.svg)](https://doi.org/10.5281/zenodo.15053412)
-[![PyPI version](https://badge.fury.io/py/segyrecover.svg)](https://badge.fury.io/py/segyrecover)
-[![GitHub](https://img.shields.io/github/license/a-pertuz/segyrecover)](https://github.com/a-pertuz/segyrecover)
+![License: GPL v3](https://img.shields.io/badge/License-GPLv3-yellow.svg)
+![Python Version](https://img.shields.io/badge/python-3.12-green)
+![PyPI](https://img.shields.io/pypi/v/segyrecover)
+![Last Commit](https://img.shields.io/github/last-commit/a-pertuz/segyrecover)
+
+
+
 
 ## Features
 
@@ -24,6 +29,8 @@ If you use this software in your research, please cite it as:
 ```
 Pertuz, A. (2025). SEGYRecover: A Python-based, user-friendly tool for digitizing vintage seismic images into SEG-Y files. Zenodo. https://doi.org/10.5281/zenodo.15053412
 ```
+
+Find this software in the Zenodo Archive: [https://doi.org/10.5281/zenodo.15053412](https://doi.org/10.5281/zenodo.15053412)
 
 ## Installation
 
@@ -81,13 +88,13 @@ The application automatically creates these folders if they don't exist.
 ## Quick Start
 
 1. Run `segyrecover`
-2. Click "Load Image" and select a seismic image file
-3. Click "Parameters" to set processing parameters
-4. Click "ROI Selection" to specify the area occupied only by the seismic section
-5. Click "Start Digitization"
-6. Wait for processing to complete
-7. Examine the resulting SEGY file and its frequency sprectrum
-
+2. In the **Welcome** tab, click "Start New Line"
+3. In the **Load Image** tab, select a seismic image file and click "Next"
+4. In the **Parameters** tab, configure or use existing processing parameters and click "Save Parameters", then "Next"
+5. In the **ROI Selection** tab, select the four corner points of your seismic section and click "Next"
+6. In the **Digitization** tab, click "Start Digitization" and monitor the process through visualization tabs
+7. Once complete, click "See Results" to move to the Results tab
+8. In the **Results** tab, examine the resulting SEGY file and its frequency spectrum
 
 ### System Requirements
 - Windows 10/11
@@ -105,13 +112,6 @@ The application automatically creates these folders if they don't exist.
 4. Click "Next" and give the shortcut a name (e.g., "SEGYRecover")
 5. Click "Finish"
 
-## Getting the Software
-
-### GitHub Repository
- [https://github.com/a-pertuz/segyrecover](https://github.com/a-pertuz/segyrecover)
-
-### Zenodo Archive
-[https://doi.org/10.5281/zenodo.15053412](https://doi.org/10.5281/zenodo.15053412)
 
 
 
