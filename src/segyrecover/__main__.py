@@ -14,49 +14,26 @@ if sys.platform.startswith("win"):
     if "-platform" not in sys.argv:
         sys.argv += ["-platform", "windows:darkmode=0"]
 
-# Global variables to track stylesheet information
-_stylesheet_path = ""
-_last_modified_time = 0
-
 def load_stylesheet(app):
     """Load and apply the stylesheet to the application."""
-    global _stylesheet_path, _last_modified_time
-    
-    _stylesheet_path = os.path.join(os.path.dirname(__file__), "ui", "theme.qss")
-    if os.path.exists(_stylesheet_path):
-        _last_modified_time = os.path.getmtime(_stylesheet_path)
-        with open(_stylesheet_path, 'r', encoding='utf-8') as f:
+    stylesheet_path = os.path.join(os.path.dirname(__file__), "ui", "theme.qss")
+    if os.path.exists(stylesheet_path):
+        with open(stylesheet_path, 'r', encoding='utf-8') as f:
             app.setStyleSheet(f.read())
         return True
     return False
 
-def check_stylesheet_changes(app):
-    """Check if the stylesheet has changed and reload if necessary."""
-    global _stylesheet_path, _last_modified_time
-    
-    if not _stylesheet_path or not os.path.exists(_stylesheet_path):
-        return
-    
-    current_mtime = os.path.getmtime(_stylesheet_path)
-    if current_mtime > _last_modified_time:
-        print(f"Stylesheet changed, reloading...")
-        _last_modified_time = current_mtime
-        with open(_stylesheet_path, 'r', encoding='utf-8') as f:
-            app.setStyleSheet(f.read())
-
 def main():
     """Run the SEGYRecover application."""
     app = QApplication(sys.argv)
-    app.setStyle("Fusion")
+    
+    # Load and apply the global stylesheet, or use windowsvista style as fallback
+    if not load_stylesheet(app):
+        app.setStyle("windowsvista")
+    else:
+        app.setStyle("Fusion")
+        
     app.setFont(QFont("Segoe UI", 10))
-
-    # Load and apply the global stylesheet
-    load_stylesheet(app)
-
-    # Set up a timer to check for stylesheet changes
-    stylesheet_timer = QTimer()
-    stylesheet_timer.timeout.connect(lambda: check_stylesheet_changes(app))
-    stylesheet_timer.start(1000)  # Check every 1000ms (1 second)
 
     window = SegyRecover()
     window.setWindowTitle('SEGYRecover')
