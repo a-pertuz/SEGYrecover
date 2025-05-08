@@ -34,7 +34,7 @@ class DataProcessor:
                 if self.progress.wasCanceled():
                     return None
 
-            self._save_array(resampled, "resampled")
+            #self._save_array(resampled, "resampled")
 
             self.progress.finish()
             return resampled
@@ -68,7 +68,7 @@ class DataProcessor:
             # Fix NaN traces by interpolating from neighbors
             filtered = self._fix_nan_traces(filtered)
             
-            self._save_array(filtered, "filtered")
+            #self._save_array(filtered, "filtered")
 
             self.progress.finish()
             return filtered

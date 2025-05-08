@@ -3,10 +3,10 @@
 import os
 import numpy as np
 
-from ..core.image_processor import ImageProcessor
-from ..core.amplitude_extractor import AmplitudeExtractor
-from ..core.data_processor import DataProcessor
-from ..core.segy_writer import SegyFileWriter
+from ..core._1_image_processor import ImageProcessor
+from ..core._2_amplitude_extractor import AmplitudeExtractor
+from ..core._3_data_processor import DataProcessor
+from ..core._4_segy_writer import SegyFileWriter
 from ..utils.console_utils import (
     section_header, success_message, error_message, 
     warning_message, info_message, progress_message,

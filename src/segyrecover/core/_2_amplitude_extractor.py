@@ -39,7 +39,7 @@ class AmplitudeExtractor:
 
             amplitude = np.array(amplitude_list, dtype=float)
 
-            self._save_array(amplitude, "raw_amplitude")
+            #self._save_array(amplitude, "raw_amplitude")
 
 
             self.progress.finish()
@@ -55,21 +55,15 @@ class AmplitudeExtractor:
             # 1. Replace zeros with trace means
             processed = self._interpolate_zeros(amplitude)
             #processed = self._subtract_trace_mean(amplitude)
-            if processed is None:
-                return None
-            self._save_array(processed, "amplitude_zeros_interpolated")
-
+            #self._save_array(processed, "amplitude_zeros_interpolated")
 
             # 2. Handle clipped values
             processed = self._handle_clipping(processed)
-            if processed is None:
-                return None
-            self._save_array(processed, "amplitude_clipping_handled")
-
+            #self._save_array(processed, "amplitude_clipping_handled")
 
             # 3. Final smoothing
             processed = self._apply_smoothing(processed)
-            self._save_array(processed, "amplitude_final")
+            #self._save_array(processed, "amplitude_final")
 
             
             return processed
@@ -200,12 +194,7 @@ class AmplitudeExtractor:
 
  
     def _save_array(self, array, name):
-        """Save intermediate amplitude data as NumPy array (.npy file)
-        
-        Args:
-            array: NumPy array containing the amplitude data
-            name: File name for the array
-        """
+        """Save intermediate amplitude data as NumPy array (.npy file)        """
         try:
             # Save the NumPy array to the raw folder
             save_dir = os.path.join(self.work_dir, "raw")
