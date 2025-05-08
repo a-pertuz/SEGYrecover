@@ -63,16 +63,8 @@ class DigitizationProcessor:
             self.processing_results[key] = None
     
     def run_digitization(self, step_callback=None):
-        """
-        Run the complete digitization process.
-        
-        Args:
-            step_callback: Optional callback function that gets called after each step
-                           with the step index and result data
-        
-        Returns:
-            bool: True if successful, False otherwise
-        """
+        """ Run the complete digitization process. """
+
         if not self._validate_inputs():
             return False
         
@@ -123,15 +115,8 @@ class DigitizationProcessor:
         return True
     
     def _remove_timelines(self, step_callback=None):
-        """
-        Step 1: Remove timelines.
-        
-        Args:
-            step_callback: Optional callback function that gets called with step index and result data
-            
-        Returns:
-            bool: True if successful, False otherwise
-        """
+        """ Step 1: Remove timelines. """
+
         info_message(self.console, "Step 1/5: Removing timelines")
         
         image_g, image_f = self.image_processor.remove_timelines(
@@ -155,15 +140,8 @@ class DigitizationProcessor:
         return True
     
     def _detect_baselines(self, step_callback=None):
-        """
-        Step 2: Detect baselines.
-        
-        Args:
-            step_callback: Optional callback function that gets called with step index and result data
-            
-        Returns:
-            bool: True if successful, False otherwise
-        """
+        """ Step 2: Detect baselines."""
+
         info_message(self.console, "Step 2/5: Detecting baselines")
         
         # Make sure we have processed image from previous step
@@ -199,15 +177,8 @@ class DigitizationProcessor:
         return True
     
     def _extract_amplitudes(self, step_callback=None):
-        """
-        Step 3: Extract amplitudes.
-        
-        Args:
-            step_callback: Optional callback function that gets called with step index and result data
-            
-        Returns:
-            bool: True if successful, False otherwise
-        """
+        """ Step 3: Extract amplitudes. """
+
         info_message(self.console, "Step 3/5: Extracting amplitudes")
         
         # Make sure we have processed image and baselines from previous steps
@@ -246,15 +217,8 @@ class DigitizationProcessor:
         return True
     
     def _process_data(self, step_callback=None):
-        """
-        Step 4: Resample and filter data.
-        
-        Args:
-            step_callback: Optional callback function that gets called with step index and result data
-            
-        Returns:
-            bool: True if successful, False otherwise
-        """
+        """ Step 4: Resample and filter data. """
+
         info_message(self.console, "Step 4/5: Resampling and filtering data")
         
         # Make sure we have processed amplitudes from previous step
@@ -313,15 +277,8 @@ class DigitizationProcessor:
         return True
     
     def _create_segy(self, step_callback=None):
-        """
-        Step 5: Create SEGY file.
-        
-        Args:
-            step_callback: Optional callback function that gets called with step index and result data
-            
-        Returns:
-            bool: True if successful, False otherwise
-        """
+        """ Step 5: Create SEGY file."""
+
         info_message(self.console, "Step 5/5: Creating SEGY file")
         
         # Make sure we have filtered data from previous step

@@ -130,12 +130,7 @@ class DataProcessor:
         return data
 
     def _save_array(self, array, name):
-            """Save intermediate amplitude data as NumPy array (.npy file)
-            
-            Args:
-                array: NumPy array containing the amplitude data
-                name: File name for the array
-            """
+            """Save intermediate amplitude data as NumPy array (.npy file) """
             try:
                 # Save the NumPy array to the raw folder
                 save_dir = os.path.join(self.work_dir, "raw")

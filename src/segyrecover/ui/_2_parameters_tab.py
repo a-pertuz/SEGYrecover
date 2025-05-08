@@ -25,7 +25,7 @@ class ParametersTab(QWidget):
         self.console = console
         self.work_dir = work_dir
         self.parameters = {}
-        self.image_path = None  # Store image path directly in this tab
+        self.image_path = None  
         
         # Define constants 
         self.POINT_CONFIGS = [
@@ -36,8 +36,8 @@ class ParametersTab(QWidget):
         
         # Define linked parameters for autofill
         self.LINKED_PARAMS = {
-            "Trace_P1": "Trace_P3",  # Left edge alignment
-            "TWT_P1": "TWT_P2"       # Top edge alignment
+            "Trace_P1": "Trace_P3",  
+            "TWT_P1": "TWT_P2"       
         }
         
         self.FREQUENCY_PARAMS = [
@@ -111,7 +111,7 @@ class ParametersTab(QWidget):
         
         # Set the parameters widget as the scroll area's widget
         scroll_area.setWidget(params_widget)
-        main_layout.addWidget(scroll_area, 1)  # 1 = stretch factor
+        main_layout.addWidget(scroll_area, 1)  
         
         # Button section with improved styling
         button_container = QWidget()

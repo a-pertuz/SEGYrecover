@@ -265,6 +265,13 @@ class ImageProcessor:
                 if (end - start) > px:
                     image[start:end, col] = 255  # Convert the segment to white
 
+
+# _save_image_array and _save_baselines methods can be used to save intermediate results
+# to the disk for debugging and analysis purposes. 
+# These methods create a directory named "raw" in the working directory
+# and save the images or baselines as NumPy arrays (.npy files).
+# 
+
     def _save_image_array(self, image, name):
         """Save intermediate image as NumPy array (.npy file)"""
         try:

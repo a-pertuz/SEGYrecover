@@ -11,9 +11,7 @@ class AmplitudeExtractor:
         self.progress = progress_bar
         self.console = console
         self.work_dir = work_dir
-        self.raw_folder = os.path.join(work_dir, 'raw_data')
-        if not os.path.exists(self.raw_folder):
-            os.makedirs(self.raw_folder)
+
 
     def extract_amplitude(self, image, baselines):
         """Extract amplitudes between consecutive baselines"""

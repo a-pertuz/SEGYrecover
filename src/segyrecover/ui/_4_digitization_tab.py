@@ -207,8 +207,6 @@ class DigitizationTab(QWidget):
                 tab_layout.addWidget(desc_label)
             
             # Create a figure with appropriate layout strategy
-            # Use constrained_layout for filtered_data (which will have a colorbar)
-            # Use tight_layout for other plots that won't have colorbar conflicts
             if config['id'] == 'filtered_data':
                 fig = Figure(constrained_layout=True)
             else:
