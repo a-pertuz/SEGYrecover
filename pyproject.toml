@@ -12,9 +12,18 @@ license = {text = "GNU GPL-3.0"}
 authors = [
     {name = "Alejandro Pertuz", email = "apertuz@ucm.es"}
 ]
+keywords = ["seismic", "digitization", "segy", "geophysics"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Topic :: Scientific/Engineering :: Geophysics",
+]
 dependencies = [
     "PySide6>=6.8.0",
-    "matplotlib>=3.10.0",
+    "matplotlib>=3.8.0",
     "numpy>=1.24.0",
     "opencv-python>=4.7.0",
     "scipy>=1.10.0",
@@ -25,6 +34,11 @@ dependencies = [
     "setuptools>=65.0.0",
     "psutil>=6.0.0"
 ]
+
+[project.urls]
+"Documentation" = "https://a-pertuz.github.io/REVSEIS/index.html"
+"Source Code" = "https://github.com/a-pertuz/SEGYRecover"
+"DOI" = "https://doi.org/10.5281/zenodo.15053412"
 
 [project.scripts]
 segyrecover = "segyrecover.__main__:main"
