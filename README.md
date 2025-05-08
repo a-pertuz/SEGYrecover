@@ -1,6 +1,6 @@
 # SEGYRecover
 
-A Python tool for digitizing scanned seismic sections and converting them to standard SEGY format. SEGYRecover automatically removes timelines, detects trace baselines, extracts amplitude information for each trace, and produces usable SEG-Y files for modern interpretation software.
+
 
 [![DOI](https://zenodo.org/badge/DOI/zenodo.15053412.svg)](https://doi.org/10.5281/zenodo.15053412)
 [![PyPI](https://img.shields.io/pypi/v/segyrecover)](https://pypi.org/project/segyrecover/)
@@ -8,6 +8,10 @@ A Python tool for digitizing scanned seismic sections and converting them to sta
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-green.svg)](https://www.gnu.org/licenses/gpl-3.0.en.html)
 [![Python Version](https://img.shields.io/badge/Python-3.12+-yellow)](https://www.python.org/downloads/)
 
+
+A Python tool for digitizing scanned seismic sections and converting them to standard SEGY format. SEGYRecover automatically removes timelines, detects trace baselines, extracts amplitude information for each trace, and produces usable SEG-Y files for modern interpretation software.
+
+SEGYRecover is part of the [REVSEIS](https://a-pertuz.github.io/REVSEIS/index.html) suite. A collection of open source tools to digitize and enhance vintage seismic sections. See [REVSEIS](https://a-pertuz.github.io/REVSEIS/index.html) for more information.
 
 
 ## Features
