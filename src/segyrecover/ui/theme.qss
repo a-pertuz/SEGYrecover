@@ -645,8 +645,6 @@ QRadioButton::indicator:checked {
 }
 
 QRadioButton::indicator:checked::after {
-    content: "";
-    display: block;
     width: 8px;
     height: 8px;
     border-radius: 4px;
