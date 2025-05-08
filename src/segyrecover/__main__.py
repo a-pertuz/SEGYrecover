@@ -2,11 +2,8 @@
 
 import sys
 import os
-import time
 from PySide6.QtWidgets import QApplication
 from PySide6.QtGui import QFont
-from PySide6.QtWidgets import QStyleFactory
-from PySide6.QtCore import QTimer
 
 from .ui.main_window import SegyRecover
 
@@ -27,18 +24,14 @@ def main():
     """Run the SEGYRecover application."""
     app = QApplication(sys.argv)
     
-    # Load and apply the global stylesheet, or use windowsvista style as fallback
     if not load_stylesheet(app):
-        app.setStyle("windowsvista")
-    else:
         app.setStyle("Fusion")
+
         
     app.setFont(QFont("Segoe UI", 10))
 
     window = SegyRecover()
     window.setWindowTitle('SEGYRecover')
-
-    #print(QStyleFactory.keys())
     
     screen = QApplication.primaryScreen().geometry()
     screen_width = min(screen.width(), 1920)

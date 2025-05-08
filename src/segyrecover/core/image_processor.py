@@ -19,37 +19,37 @@ class ImageProcessor:
         self.progress.start("Detecting timelines...", 6)
 
         try:
-            self._save_image_array(image_a, "image_a")
+            #self._save_image_array(image_a, "image_a")
             
             image_b = image_a.copy()
             self._erosion_left(image_b, HE)
-            self._save_image_array(image_b, "image_b")
+            #self._save_image_array(image_b, "image_b")
             self.progress.update(1)
 
             image_c = image_b.copy()
             self._remove_vertical_segments(image_c, HLT)
-            self._save_image_array(image_c, "image_c")
+            #self._save_image_array(image_c, "image_c")
             self.progress.update(2)
 
             image_d = image_c.copy()
             self._erosion_right(image_d, HE)
-            self._save_image_array(image_d, "image_d")
+            #self._save_image_array(image_d, "image_d")
             self.progress.update(3)
 
             image_f = image_d.copy()
             self._dilation_top(image_f, max(1, int(HLT/2)))
             self._dilation_bottom(image_f, max(1, int(HLT/2)))
-            self._save_image_array(image_f, "image_f")
+            #self._save_image_array(image_f, "image_f")
             self.progress.update(4)
 
             image_e = image_a.copy()
             self._remove_vertical_segments(image_e, HLT)
-            self._save_image_array(image_e, "image_e")
+            #self._save_image_array(image_e, "image_e")
             self.progress.update(5)
 
             image_g = image_a.copy()
             image_g[(image_e == 0) & (image_f == 0)] = 255
-            self._save_image_array(image_g, "image_g")
+            #self._save_image_array(image_g, "image_g")
 
             self.progress.finish()
             return image_g, image_f
@@ -66,33 +66,33 @@ class ImageProcessor:
         self.progress.start("Detecting baselines...", 10)
 
         try:
-            self._save_image_array(image_g, "image_g_baseline_input")
+            #self._save_image_array(image_g, "image_g_baseline_input")
             
             # 1. Enhance baselines through morphological operations
             image_i = image_g.copy()
             self._erosion_left(image_i, TLT)  
-            self._save_image_array(image_i, "image_i")
+            #self._save_image_array(image_i, "image_i")
             self.progress.update(1)
 
             image_j = image_i.copy()
             self._erosion_top(image_j, TLT)  
-            self._save_image_array(image_j, "image_j")
+            #self._save_image_array(image_j, "image_j")
             self.progress.update(2)
 
             image_k = image_j.copy()
             self._dilation_top(image_k, TLT) 
-            self._save_image_array(image_k, "image_k")
+            #self._save_image_array(image_k, "image_k")
             self.progress.update(3)
 
             image_l = image_k.copy()
             self._dilation_left(image_l, TLT)  
-            self._save_image_array(image_l, "image_l")
+            #self._save_image_array(image_l, "image_l")
             self.progress.update(4)
 
             image_m = image_l.copy()
             self._dilation_left(image_m, TLT)              
             image_m[(image_l == 0)] = 255 
-            self._save_image_array(image_m, "image_m")
+            #self._save_image_array(image_m, "image_m")
             self.progress.update(5)
 
             image_processed = image_m.copy()
@@ -124,9 +124,9 @@ class ImageProcessor:
             final_baselines = self._add_synthetic_baselines(clean_baselines)
             self.progress.update(10)
 
-            self._save_baselines(raw_baselines, "raw_baselines")
-            self._save_baselines(clean_baselines, "clean_baselines")
-            self._save_baselines(final_baselines, "final_baselines")
+            #self._save_baselines(raw_baselines, "raw_baselines")
+            #self._save_baselines(clean_baselines, "clean_baselines")
+            #self._save_baselines(final_baselines, "final_baselines")
 
             self.progress.finish()
             return image_m, raw_baselines, clean_baselines, final_baselines
@@ -266,12 +266,7 @@ class ImageProcessor:
                     image[start:end, col] = 255  # Convert the segment to white
 
     def _save_image_array(self, image, name):
-        """Save intermediate image as NumPy array (.npy file)
-        
-        Args:
-            image: NumPy array containing the image
-            name: File name for the image
-        """
+        """Save intermediate image as NumPy array (.npy file)"""
         try:
             # Create raw directory if it doesn't exist
             save_dir = os.path.join(self.work_dir, "raw")
