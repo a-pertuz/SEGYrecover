@@ -47,6 +47,20 @@ class DigitizationProcessor:
             'filtered_data': None
         }
     
+    def reset(self):
+        """Reset all state variables when starting a new line."""
+        # Reset state variables
+        self.image_path = None
+        self.binary_rectified_image = None
+        self.parameters = {}
+        self.final_baselines = None
+        self.filtered_data = None
+        self.segy_path = None
+        
+        # Reset processing results
+        for key in self.processing_results:
+            self.processing_results[key] = None
+    
     def set_data(self, image_path, binary_rectified_image, parameters):
         """Set the input data for processing."""
         self.image_path = image_path
@@ -72,25 +86,40 @@ class DigitizationProcessor:
         
         try:
             # Step 1: Remove timelines
+            info_message(self.console, "Starting Step 1: Remove timelines")
             if not self._remove_timelines(step_callback):
+                error_message(self.console, "Step 1 failed: Timeline removal unsuccessful.")
                 return False
-            
+            success_message(self.console, "Step 1 completed: Timelines removed successfully.")
+
             # Step 2: Detect baselines
+            info_message(self.console, "Starting Step 2: Detect baselines")
             if not self._detect_baselines(step_callback):
+                error_message(self.console, "Step 2 failed: Baseline detection unsuccessful.")
                 return False
-            
+            success_message(self.console, "Step 2 completed: Baselines detected successfully.")
+
             # Step 3: Extract amplitudes
+            info_message(self.console, "Starting Step 3: Extract amplitudes")
             if not self._extract_amplitudes(step_callback):
+                error_message(self.console, "Step 3 failed: Amplitude extraction unsuccessful.")
                 return False
-            
+            success_message(self.console, "Step 3 completed: Amplitudes extracted successfully.")
+
             # Step 4: Process data
+            info_message(self.console, "Starting Step 4: Resample and filter data")
             if not self._process_data(step_callback):
+                error_message(self.console, "Step 4 failed: Data processing unsuccessful.")
                 return False
-            
+            success_message(self.console, "Step 4 completed: Data resampled and filtered successfully.")
+
             # Step 5: Create SEGY
+            info_message(self.console, "Starting Step 5: Create SEGY file")
             if not self._create_segy(step_callback):
+                error_message(self.console, "Step 5 failed: SEGY file creation unsuccessful.")
                 return False
-            
+            success_message(self.console, "Step 5 completed: SEGY file created successfully.")
+
             # Display completion summary
             self._display_completion_summary()
             
@@ -116,18 +145,12 @@ class DigitizationProcessor:
     
     def _remove_timelines(self, step_callback=None):
         """ Step 1: Remove timelines. """
-
-        info_message(self.console, "Step 1/5: Removing timelines")
         
         image_g, image_f = self.image_processor.remove_timelines(
             self.binary_rectified_image,
             self.parameters["HE"],
             self.parameters["HLT"]
         )
-        
-        if image_g is None:
-            error_message(self.console, "Timeline removal failed")
-            return False
         
         # Store results
         self.processing_results['image_f'] = image_f
@@ -141,13 +164,6 @@ class DigitizationProcessor:
     
     def _detect_baselines(self, step_callback=None):
         """ Step 2: Detect baselines."""
-
-        info_message(self.console, "Step 2/5: Detecting baselines")
-        
-        # Make sure we have processed image from previous step
-        if self.processing_results['image_g'] is None:
-            error_message(self.console, "Can't detect baselines without processed image")
-            return False
         
         image_m, raw_baselines, clean_baselines, final_baselines = self.image_processor.detect_baselines(
             self.processing_results['image_g'],
@@ -156,10 +172,6 @@ class DigitizationProcessor:
             self.parameters["BDE"],
             self.parameters["BFT"]
         )
-        
-        if image_m is None:
-            error_message(self.console, "Baseline detection failed")
-            return False
         
         # Add statistics for baselines
         info_message(self.console, f"Raw baselines detected: {len(raw_baselines)}")
@@ -178,30 +190,15 @@ class DigitizationProcessor:
     
     def _extract_amplitudes(self, step_callback=None):
         """ Step 3: Extract amplitudes. """
-
-        info_message(self.console, "Step 3/5: Extracting amplitudes")
-        
-        # Make sure we have processed image and baselines from previous steps
-        if self.processing_results['image_g'] is None or self.final_baselines is None:
-            error_message(self.console, "Can't extract amplitudes without processed image and baselines")
-            return False
         
         raw_amplitude = self.amplitude_extractor.extract_amplitude(
             self.processing_results['image_g'], 
             self.final_baselines
         )
         
-        if raw_amplitude is None:
-            error_message(self.console, "Failed to extract amplitude")
-            return False
-        
         processed_amplitude = self.amplitude_extractor.process_amplitudes(
             raw_amplitude
         )
-        
-        if processed_amplitude is None:
-            error_message(self.console, "Failed to process amplitude")
-            return False
         
         # Store results
         self.processing_results['raw_amplitude'] = raw_amplitude
@@ -218,14 +215,7 @@ class DigitizationProcessor:
     
     def _process_data(self, step_callback=None):
         """ Step 4: Resample and filter data. """
-
-        info_message(self.console, "Step 4/5: Resampling and filtering data")
-        
-        # Make sure we have processed amplitudes from previous step
-        if self.processing_results['processed_amplitude'] is None:
-            error_message(self.console, "Can't process data without processed amplitudes")
-            return False
-        
+    
         processed_amplitude = self.processing_results['processed_amplitude']
         
         # Define time axes
@@ -241,26 +231,14 @@ class DigitizationProcessor:
             old_times,
             new_times
         )
-        
-        if resampled is None:
-            error_message(self.console, "Failed to resample data")
-            return False
-        
-        info_message(self.console, f"Resampled from {processed_amplitude.shape[0]} to {resampled.shape[0]} samples")
-        
+
+        info_message(self.console, f"Resampled: {processed_amplitude.shape[0]} → {resampled.shape[0]} samples")
+
         # Filter data
         filtered_data = self.data_processor.filter_data(
             resampled,
-            self.parameters["DT"],
-            self.parameters["F1"],
-            self.parameters["F2"],
-            self.parameters["F3"],
-            self.parameters["F4"]
+            self.parameters
         )
-        
-        if filtered_data is None:
-            error_message(self.console, "Failed to filter data")
-            return False
         
         # Store results
         self.processing_results['resampled_amplitude'] = resampled
@@ -278,20 +256,12 @@ class DigitizationProcessor:
     
     def _create_segy(self, step_callback=None):
         """ Step 5: Create SEGY file."""
-
-        info_message(self.console, "Step 5/5: Creating SEGY file")
-        
-        # Make sure we have filtered data from previous step
-        if self.filtered_data is None:
-            error_message(self.console, "Can't create SEGY without filtered data")
-            return False
         
         # Create SEGY output path
         base_name = os.path.splitext(os.path.basename(self.image_path))[0]
         self.segy_path = os.path.join(self.work_dir, "SEGY", f"{base_name}.segy")
         
-        # Write SEGY file
-        if not self.segy_writer.write_segy(
+        self.segy_writer.write_segy(
             self.filtered_data,
             self.final_baselines,
             self.image_path,
@@ -300,16 +270,11 @@ class DigitizationProcessor:
             self.parameters["F2"],
             self.parameters["F3"],
             self.parameters["F4"]
-        ):
-            error_message(self.console, "Failed to create SEGY file")
-            return False
+        )
         
-        # Call callback if provided
         if step_callback:
             step_callback(4, {'segy_path': self.segy_path})
-        
-        success_message(self.console, "Digitization completed successfully!")
-        
+                
         return True
     
     def _display_completion_summary(self):
@@ -327,6 +292,9 @@ class DigitizationProcessor:
             "Output file": self.segy_path,
             "File size": f"{os.path.getsize(self.segy_path) / (1024*1024):.2f} MB"
         })
+
+        success_message(self.console, "Digitization completed successfully!")
+
     
     def get_results(self):
         """Get the processing results."""

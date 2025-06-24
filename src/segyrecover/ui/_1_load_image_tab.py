@@ -221,7 +221,7 @@ class LoadImageTab(QWidget):
         geometry_file = os.path.join(self.work_dir, 'GEOMETRY', f'{base_name}.geometry')
         
         if not os.path.exists(geometry_file):
-            self.console.append("Geometry file not found.\n")
+            error_message(self.console, "Geometry file not found.")
             self.location_canvas.draw()
             return False
             

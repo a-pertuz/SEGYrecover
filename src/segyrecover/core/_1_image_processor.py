@@ -3,7 +3,10 @@
 import os
 import numpy as np
 from PySide6.QtCore import Qt
-
+from ..utils.console_utils import (
+    section_header, success_message, error_message, 
+    warning_message, info_message, progress_message
+)
 class ImageProcessor:
     """Class for processing seismic images."""
     
@@ -15,7 +18,7 @@ class ImageProcessor:
     def remove_timelines(self, image_a, HE, HLT):
         """Timeline removal algorithm"""
 
-        self.console.append("Detecting and removing timelines...\n")
+        info_message(self.console, "Detecting and removing timelines...")
         self.progress.start("Detecting timelines...", 6)
 
         try:
@@ -55,14 +58,12 @@ class ImageProcessor:
             return image_g, image_f
         
         except Exception as e:
-            self.console.setTextColor(Qt.red)
-            self.console.append(f"Error removing timelines: {e}\n")
-            self.console.setTextColor(Qt.black)
+            error_message(self.console, f"Error removing timelines: {e}")
             return None, None
 
     def detect_baselines(self, image_g, TLT, BDB, BDE, BFT):
         """Detect vertical baselines in image"""
-        self.console.append("Detecting baselines...\n")
+        info_message(self.console, "Detecting baselines...")
         self.progress.start("Detecting baselines...", 10)
 
         try:
@@ -132,7 +133,7 @@ class ImageProcessor:
             return image_m, raw_baselines, clean_baselines, final_baselines
 
         except Exception as e:
-            self.console.append(f"Error in baseline detection: {str(e)}\n")
+            error_message(self.console, f"Error in baseline detection: {str(e)}")
             return None, None, None, None
 
     # Helper methods
@@ -283,11 +284,9 @@ class ImageProcessor:
             file_path = os.path.join(save_dir, f"{name}.npy")
             np.save(file_path, image)
             
-            self.console.append(f"Saved {name} to {file_path}\n")
+            info_message(self.console, f"Saved {name} to {file_path}")
         except Exception as e:
-            self.console.setTextColor(Qt.red)
-            self.console.append(f"Error saving image {name}: {e}\n")
-            self.console.setTextColor(Qt.black)
+            error_message(self.console, f"Error saving image {name}: {e}")
 
     def _save_baselines(self, baselines, name):
         try:
@@ -302,8 +301,6 @@ class ImageProcessor:
             file_path = os.path.join(save_dir, f"{name}.npy")
             np.save(file_path, baseline_array)
             
-            self.console.append(f"Saved {name} baselines to {file_path}\n")
+            info_message(self.console, f"Saved {name} baselines to {file_path}")
         except Exception as e:
-            self.console.setTextColor(Qt.red)
-            self.console.append(f"Error saving baselines {name}: {e}\n")
-            self.console.setTextColor(Qt.black)
+            error_message(self.console, f"Error saving baselines {name}: {e}")

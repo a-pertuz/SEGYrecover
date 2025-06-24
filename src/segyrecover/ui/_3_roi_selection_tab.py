@@ -184,9 +184,6 @@ class ROISelectionTab(QWidget):
         
         # Main next button with fixed width
         self.next_button = QPushButton("Next")
-        self.next_button.setObjectName("next_button")
-        self.next_button.setMinimumWidth(100)
-        self.next_button.setFixedHeight(36)
         self.next_button.setEnabled(False)
         self.next_button.clicked.connect(self.proceedRequested.emit)
         button_layout.addWidget(self.next_button)
@@ -195,6 +192,8 @@ class ROISelectionTab(QWidget):
         
         # Initialize button styles
         self._apply_button_styles()
+
+
     
     def _apply_button_styles(self):
         """Apply the appropriate styles to all buttons based on their state."""
@@ -208,12 +207,10 @@ class ROISelectionTab(QWidget):
     
     def update_with_image(self, image_path, img_array):
         """Update the tab with the loaded image and prepare for ROI selection."""
-        if img_array is None:
-            return
-            
+
         section_header(self.console, "ROI SELECTION")
-        info_message(self.console, "Ready to select region of interest")
-        
+        info_message(self.console, "Ready to select region of interest.")
+
         # Set the image in the processor
         self.roi_processor.set_image(image_path, img_array)
         
@@ -228,7 +225,7 @@ class ROISelectionTab(QWidget):
             
             if reply == QMessageBox.Yes:
                 self.roi_processor.load_roi_points()
-                success_message(self.console, "Loaded existing ROI")
+                success_message(self.console, "Loaded existing ROI from file.")
                 self.process_roi()
                 return
         
@@ -247,22 +244,16 @@ class ROISelectionTab(QWidget):
         
         # Clear and update image canvas
         self.ax.clear()
-        self.ax.imshow(self.roi_processor.display_image, cmap='gray')
+        self.ax.imshow(self.roi_processor.display_image, cmap='gray', aspect='equal')
         self.ax.set_title("Original Image - Select Points")
-        self.ax.axis('off')
         self.canvas.draw()
         
         # Clear rectified image canvas
         self.rectified_ax.clear()
         self.rectified_ax.set_title("Rectified Image (select ROI first)")
-        self.rectified_ax.axis('off')
         self.rectified_canvas.draw()
         
-        # Show resolution message if downsampled
-        if self.roi_processor.downsample_factor > 1:
-            info_message(self.console, 
-                f"Image displayed at reduced resolution ({100/self.roi_processor.downsample_factor:.1f}%) for performance")
-    
+            
     def activate_point_selection(self, point_idx):
         """Activate point selection mode for the specific point."""
         # Disable all point buttons during selection
@@ -445,7 +436,7 @@ class ROISelectionTab(QWidget):
     def update_display(self):
         """Redraw the display with current points."""
         self.ax.clear()
-        self.ax.imshow(self.roi_processor.display_image, cmap='gray')
+        self.ax.imshow(self.roi_processor.display_image, cmap='gray', aspect='equal')
         
         # Draw all existing points
         for i, point in enumerate(self.roi_processor.points):
@@ -480,9 +471,8 @@ class ROISelectionTab(QWidget):
         if self.roi_processor.process_roi():
             # Display the rectified image
             self.rectified_ax.clear()
-            self.rectified_ax.imshow(self.roi_processor.binary_rectified_image, cmap='gray')
+            self.rectified_ax.imshow(self.roi_processor.binary_rectified_image, cmap='gray', aspect='equal')
             self.rectified_ax.set_title("Rectified Image")
-            self.rectified_ax.axis('off')
             self.rectified_canvas.draw()
             
             # Update UI state
@@ -505,7 +495,6 @@ class ROISelectionTab(QWidget):
         # Clear rectified image
         self.rectified_ax.clear()
         self.rectified_ax.set_title("Rectified Image (select ROI first)")
-        self.rectified_ax.axis('off')
         self.rectified_canvas.draw()
         
         # Update UI state

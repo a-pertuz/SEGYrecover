@@ -82,7 +82,7 @@ class NavigationPanel(QWidget):
         # Define the navigation items with display names and internal identifiers
         nav_items = [
             ("Welcome", "welcome"),
-            ("Load Image", "load_image"),
+            ("Image Loading", "image_loading"),
             ("Parameters", "parameters"),
             ("ROI Selection", "roi_selection"),
             ("Digitization", "digitization"),

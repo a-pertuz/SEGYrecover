@@ -160,11 +160,14 @@ class SegyRecover(QMainWindow):
         
         # Add content container to main layout
         main_layout.addWidget(content_container, 1)  # 1 = stretch factor
-        
+
         # Create the progress bar as the main window's status bar
         self.progress = ProgressStatusBar()
         self.setStatusBar(self.progress)
-        
+
+        # Enable auto-scroll for the console
+        self.console.textChanged.connect(lambda: self.console.verticalScrollBar().setValue(self.console.verticalScrollBar().maximum()))
+
         # Initialize log file
         self.log_file_path = initialize_log_file(self.work_dir)
         if self.log_file_path:
@@ -243,10 +246,20 @@ class SegyRecover(QMainWindow):
         self.binary_rectified_image = None
         self.parameters = {}
         
-        # Get the LoadImageTab and explicitly reset it
+        # Get tabs and explicitly reset them
         load_image_tab = self.tab_container.widget(self.tab_container.tab_indices["load_image"])
         if hasattr(load_image_tab, "reset"):
             load_image_tab.reset()
+            
+        # Reset the digitization tab
+        digitization_tab = self.tab_container.widget(self.tab_container.tab_indices["digitization"])
+        if hasattr(digitization_tab, "reset"):
+            digitization_tab.reset()
+            
+        # Reset the results tab
+        results_tab = self.tab_container.widget(self.tab_container.tab_indices["results"])
+        if hasattr(results_tab, "reset"):
+            results_tab.reset()
         
         # Switch to load image tab and enable only this step
         self.proceed_to_tab("load_image")
@@ -262,22 +275,18 @@ class SegyRecover(QMainWindow):
         self.tab_container.switch_to(tab_id)
         self.navigation_panel.set_active(tab_id)
         
-        # Special handling for specific tabs
         if tab_id == "parameters" and self.image_path:
-            # Auto-load parameters if an image is loaded
             params_tab = self.tab_container.widget(self.tab_container.tab_indices["parameters"])
             if hasattr(params_tab, "load_parameters"):
+                section_header(self.console, "PARAMETER CONFIGURATION")
                 params_tab.load_parameters(self.image_path)
-                # Next button should be disabled until parameters are saved
         
         elif tab_id == "roi_selection" and self.image_path is not None and self.img_array is not None:
-            # Update ROI tab with image data
             roi_tab = self.tab_container.widget(self.tab_container.tab_indices["roi_selection"])
             if hasattr(roi_tab, "update_with_image"):
                 roi_tab.update_with_image(self.image_path, self.img_array)
         
         elif tab_id == "digitization" and self.binary_rectified_image is not None and self.parameters:
-            # Update digitization tab with necessary data
             digitization_tab = self.tab_container.widget(self.tab_container.tab_indices["digitization"])
             if hasattr(digitization_tab, "update_with_data"):
                 digitization_tab.update_with_data(
@@ -297,43 +306,12 @@ class SegyRecover(QMainWindow):
     def handle_parameters_set(self, parameters):
         """Handle parameters set signal from ParametersTab."""
         self.parameters = parameters
-        
-        # Debug output to help diagnose issues
-        info_message(self.console, f"Parameters set: {len(parameters)} parameters")
-        
-        # Enable navigation to next step
         self.navigation_panel.enable_tabs_until("roi_selection")
     
     def handle_roi_selected(self, points, binary_rectified_image=None):
         """Handle ROI selected signal from ROISelectionTab."""
         self.points = points
-        
-        # Get the ROI tab to access rectified image
-        roi_tab = self.tab_container.widget(self.tab_container.tab_indices["roi_selection"])
-        
-        # Use the binary_rectified_image directly from the signal if provided
-        if binary_rectified_image is not None:
-            self.binary_rectified_image = binary_rectified_image
-            info_message(self.console, "Received binary rectified image directly from ROI selection")
-        # Fall back to the tab property if signal parameter isn't available
-        elif hasattr(roi_tab, "binary_rectified_image") and roi_tab.binary_rectified_image is not None:
-            self.binary_rectified_image = roi_tab.binary_rectified_image
-            info_message(self.console, "Retrieved binary rectified image from ROI tab")
-        else:
-            error_message(self.console, "Binary rectified image is not available")
-            return
-            
-        # Get the rectified image (not binary) if available
-        if hasattr(roi_tab, "rectified_image"):
-            self.rectified_image = roi_tab.rectified_image
-        
-        # Output debug information to console
-        info_message(self.console, f"ROI selected: {len(points)} points")
-        if self.binary_rectified_image is not None:
-            binary_shape = self.binary_rectified_image.shape
-            info_message(self.console, f"Binary rectified image shape: {binary_shape[1]}x{binary_shape[0]} pixels")
-        
-        # Enable navigation to next step
+        self.binary_rectified_image = binary_rectified_image
         self.navigation_panel.enable_tabs_until("digitization")
     
     def handle_digitization_completed(self, segy_path, filtered_data):

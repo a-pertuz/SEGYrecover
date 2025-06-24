@@ -115,11 +115,11 @@ class ROIProcessor:
     def process_roi(self):
         """Process the selected ROI and generate rectified image."""
         if len(self.points) != 4 or self.img_array is None:
-            error_message(self.console, "Invalid ROI or missing image")
+            error_message(self.console, "ROI selection failed: Invalid ROI or missing image.")
             return False
-        
+
         try:
-            info_message(self.console, "Calculating perspective transformation")
+            info_message(self.console, "Calculating perspective transformation...")
             
             # Apply perspective transform using original coordinates
             pts1 = np.float32(self.points)
@@ -128,34 +128,20 @@ class ROIProcessor:
             pts2 = np.float32([[0, 0], [width, 0], [0, height], [width, height]])
             matrix = cv2.getPerspectiveTransform(pts1, pts2)
             self.rectified_image = cv2.warpPerspective(self.img_array, matrix, (width, height))
-            
-            # Explicitly check the rectified image
-            if self.rectified_image is None or self.rectified_image.size == 0:
-                error_message(self.console, "Failed to create rectified image")
-                return False
+        
                 
             # Convert to binary image with explicit handling
             ret, self.binary_rectified_image = cv2.threshold(self.rectified_image, 128, 255, cv2.THRESH_BINARY)
-            
-            if not ret or self.binary_rectified_image is None or self.binary_rectified_image.size == 0:
-                error_message(self.console, "Failed to create binary rectified image")
-                return False
-            
-            info_message(self.console, f"ROI processed - Binary image created with shape: {self.binary_rectified_image.shape}")
-            
+
             # Save ROI points
             roi_path = self._get_roi_path()
             self.save_roi_points(roi_path)
             
-            success_message(self.console, "Seismic section cropped and rectified")
-            info_message(self.console, f"New dimensions: {width}x{height} pixels")
-            
+            success_message(self.console, "Seismic section cropped and rectified.")
             return True
-            
+
         except Exception as e:
-            import traceback
-            error_message(self.console, f"Error processing ROI: {str(e)}")
-            error_message(self.console, traceback.format_exc())
+            error_message(self.console, f"ROI processing error: {str(e)}")
             return False
     
     def _get_roi_path(self):
@@ -197,7 +183,7 @@ class ROIProcessor:
             with open(roi_path, "w") as f:
                 for point in self.points:
                     f.write(f"{point[0]} {point[1]}\n")
-            info_message(self.console, f"ROI points saved to: {os.path.basename(roi_path)}")
+            success_message(self.console, f"ROI points saved to: {os.path.basename(roi_path)}")
             return True
         except Exception as e:
             error_message(self.console, f"Error saving ROI points: {str(e)}")

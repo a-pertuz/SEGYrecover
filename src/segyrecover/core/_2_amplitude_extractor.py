@@ -3,7 +3,10 @@
 import os
 import numpy as np
 from scipy.interpolate import Akima1DInterpolator
-
+from ..utils.console_utils import (
+    section_header, success_message, error_message, 
+    warning_message, info_message, progress_message
+)
 class AmplitudeExtractor:
     """Handles amplitude extraction and processing from seismic images"""
     
@@ -15,7 +18,7 @@ class AmplitudeExtractor:
 
     def extract_amplitude(self, image, baselines):
         """Extract amplitudes between consecutive baselines"""
-        self.console.append("Extracting trace amplitude...\n")
+        info_message(self.console, "Extracting trace amplitude...")
         self.progress.start("Extracting amplitude...", image.shape[0])
 
         try:
@@ -46,7 +49,7 @@ class AmplitudeExtractor:
             return amplitude
 
         except Exception as e:
-            self.console.append(f"Error extracting amplitude: {str(e)}\n")
+            error_message(self.console, f"Error extracting amplitude: {str(e)}")
             return None
 
     def process_amplitudes(self, amplitude):
@@ -69,12 +72,12 @@ class AmplitudeExtractor:
             return processed
 
         except Exception as e:
-            self.console.append(f"Error processing amplitudes: {str(e)}\n")
+            error_message(self.console, f"Error processing amplitudes: {str(e)}")
             return None
 
     def _subtract_trace_mean(self, amplitude):
         """Subtract the trace mean from all values in the trace"""
-        self.console.append("Subtracting trace mean from all values...\n")
+        info_message(self.console, "Subtracting trace mean from all values...")
         self.progress.start("Subtracting trace mean...", amplitude.shape[1])
 
         try:
@@ -91,12 +94,12 @@ class AmplitudeExtractor:
             return processed
 
         except Exception as e:
-            self.console.append(f"Error subtracting trace mean: {str(e)}\n")
+            error_message(self.console, f"Error subtracting trace mean: {str(e)}")
             return None
 
     def _interpolate_zeros(self, amplitude):
         """Replace zero values with trace means"""
-        self.console.append("Interpolating zero values...\n")
+        info_message(self.console, "Interpolating zero values...")
         self.progress.start("Interpolating zeros...", amplitude.shape[1])
 
         try:
@@ -115,12 +118,12 @@ class AmplitudeExtractor:
             return processed
 
         except Exception as e:
-            self.console.append(f"Error interpolating zeros: {str(e)}\n")
+            error_message(self.console, f"Error interpolating zeros: {str(e)}")
             return None
 
     def _handle_clipping(self, amplitude):
         """Handle clipped values using Akima interpolation"""
-        self.console.append("Interpolating clipped values...\n")
+        info_message(self.console, "Interpolating clipped values...")
         self.progress.start("Handling clipping...", amplitude.shape[1])
 
         try:
@@ -148,15 +151,14 @@ class AmplitudeExtractor:
                 if self.progress.wasCanceled():
                     return None
 
-            self.console.append(f"\nInterpolation statistics:")
-            self.console.append(f"Traces interpolated using Akima: {akima_count}")
-            self.console.append(f"Traces kept original: {original_count}\n")
+            info_message(self.console, f"Traces interpolated using Akima: {akima_count}")
+            info_message(self.console, f"Traces kept original: {original_count}\n")
 
             self.progress.finish()
             return processed
 
         except Exception as e:
-            self.console.append(f"Error handling clipping: {str(e)}\n")
+            error_message(self.console, f"Error handling clipping: {str(e)}")
             return None
 
     def _get_unclipped_indices(self, positive_mask):
@@ -190,6 +192,8 @@ class AmplitudeExtractor:
         for i in range(amplitude.shape[1]):
             processed[:, i] = np.convolve(amplitude[:, i], kernel, mode='same')
 
+        info_message(self.console, "Applying final smoothing...")
+
         return processed
 
  
@@ -203,6 +207,6 @@ class AmplitudeExtractor:
             file_path = os.path.join(save_dir, f"{name}.npy")
             np.save(file_path, array)
             
-            self.console.append(f"Saved {name} to {file_path}\n")
+            info_message(self.console, f"Saved {name} to {file_path}")
         except Exception as e:
-            self.console.append(f"Error saving array {name}: {str(e)}\n")
+            error_message(self.console, f"Error saving array {name}: {str(e)}")

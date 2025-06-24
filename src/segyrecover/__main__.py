@@ -7,7 +7,7 @@ from PySide6.QtGui import QFont
 
 from .ui.main_window import SegyRecover
 
-if sys.platform.startswith("win"):
+if sys.platform.startswith("win"): # Ensure dark mode is disabled on Windows
     if "-platform" not in sys.argv:
         sys.argv += ["-platform", "windows:darkmode=0"]
 
@@ -25,7 +25,7 @@ def main():
     app = QApplication(sys.argv)
     
     if not load_stylesheet(app):
-        app.setStyle("Fusion")
+        app.setStyle("Fusion") # Fallback to Fusion style if stylesheet not found
 
         
     app.setFont(QFont("Segoe UI", 10))
@@ -36,10 +36,11 @@ def main():
     screen = QApplication.primaryScreen().geometry()
     screen_width = min(screen.width(), 1920)
     screen_height = min(screen.height(), 1080)    
-    pos_x = int(screen_width * 0.05)
-    pos_y = int(screen_height * 0.05)
     window_width = int(screen_width * 0.9)
     window_height = int(screen_height * 0.85)
+    pos_x = (screen_width - window_width) // 2
+    pos_y = (screen_height - window_height) // 2
+
     
     window.setGeometry(pos_x, pos_y, window_width, window_height)
     
