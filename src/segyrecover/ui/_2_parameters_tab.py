@@ -31,15 +31,15 @@ class ParametersTab(QWidget):
         # Define all parameters with their metadata
         self.PARAMETERS = {
             # Point parameters
-            "Trace_P1": {"group": "Points", "default": 0, "validator": QIntValidator()},
-            "TWT_P1": {"group": "Points", "default": 0, "validator": QIntValidator()},
-            "Trace_P2": {"group": "Points", "default": 0, "validator": QIntValidator()},
-            "TWT_P2": {"group": "Points", "default": 0, "validator": QIntValidator()},
-            "Trace_P3": {"group": "Points", "default": 0, "validator": QIntValidator()},
-            "TWT_P3": {"group": "Points", "default": 0, "validator": QIntValidator()},
+            "Trace_P1": {"group": "Points", "default": 1, "validator": QIntValidator()},
+            "TWT_P1": {"group": "Points", "default": "", "validator": QIntValidator()},
+            "Trace_P2": {"group": "Points", "default": "", "validator": QIntValidator()},
+            "TWT_P2": {"group": "Points", "default": "", "validator": QIntValidator()},
+            "Trace_P3": {"group": "Points", "default": "", "validator": QIntValidator()},
+            "TWT_P3": {"group": "Points", "default": "", "validator": QIntValidator()},
             
             # Acquisition parameters
-            "DT": {"group": "Acquisition", "default": 4, "validator": QIntValidator(), 
+            "DT": {"group": "Acquisition", "default": "", "validator": QIntValidator(), 
                   "label": "Sample Rate (ms)", "tooltip": "Time interval between samples in milliseconds"},
             
             # Frequency parameters
@@ -53,7 +53,7 @@ class ParametersTab(QWidget):
                    "label": "Traceline Thickness", "tooltip": "Thickness of vertical trace lines"},
             "HLT": {"group": "Detection", "default": 5, "validator": QIntValidator(), 
                    "label": "Timeline Thickness", "tooltip": "Thickness of horizontal time lines"},
-            "HE": {"group": "Detection", "default": 50, "validator": QIntValidator(), 
+            "HE": {"group": "Detection", "default": 100, "validator": QIntValidator(), 
                   "label": "Horizontal Erode", "tooltip": "Erosion size for horizontal features"},
             "BDB": {"group": "Detection", "default": 20, "validator": QIntValidator(), 
                    "label": "Baseline Detection Beginning", "tooltip": "Start of baseline detection range (pixels from top)"},
@@ -64,21 +64,21 @@ class ParametersTab(QWidget):
                    
             # TVBP parameters - explicitly define all interval fields
             "TVF_1_T1": {"group": "TVBP", "default": 0, "validator": QIntValidator(), "interval": 1, "field": "T1"},
-            "TVF_1_T2": {"group": "TVBP", "default": 0, "validator": QIntValidator(), "interval": 1, "field": "T2"},
+            "TVF_1_T2": {"group": "TVBP", "default": 1000, "validator": QIntValidator(), "interval": 1, "field": "T2"},
             "TVF_1_F1": {"group": "TVBP", "default": 10, "validator": QIntValidator(), "interval": 1, "field": "F1"},
             "TVF_1_F2": {"group": "TVBP", "default": 12, "validator": QIntValidator(), "interval": 1, "field": "F2"},
             "TVF_1_F3": {"group": "TVBP", "default": 50, "validator": QIntValidator(), "interval": 1, "field": "F3"},
             "TVF_1_F4": {"group": "TVBP", "default": 60, "validator": QIntValidator(), "interval": 1, "field": "F4"},
             
-            "TVF_2_T1": {"group": "TVBP", "default": 0, "validator": QIntValidator(), "interval": 2, "field": "T1"},
-            "TVF_2_T2": {"group": "TVBP", "default": 0, "validator": QIntValidator(), "interval": 2, "field": "T2"},
+            "TVF_2_T1": {"group": "TVBP", "default": 1000, "validator": QIntValidator(), "interval": 2, "field": "T1"},
+            "TVF_2_T2": {"group": "TVBP", "default": 2000, "validator": QIntValidator(), "interval": 2, "field": "T2"},
             "TVF_2_F1": {"group": "TVBP", "default": 10, "validator": QIntValidator(), "interval": 2, "field": "F1"},
             "TVF_2_F2": {"group": "TVBP", "default": 12, "validator": QIntValidator(), "interval": 2, "field": "F2"},
             "TVF_2_F3": {"group": "TVBP", "default": 50, "validator": QIntValidator(), "interval": 2, "field": "F3"},
             "TVF_2_F4": {"group": "TVBP", "default": 60, "validator": QIntValidator(), "interval": 2, "field": "F4"},
             
-            "TVF_3_T1": {"group": "TVBP", "default": 0, "validator": QIntValidator(), "interval": 3, "field": "T1"},
-            "TVF_3_T2": {"group": "TVBP", "default": 0, "validator": QIntValidator(), "interval": 3, "field": "T2"},
+            "TVF_3_T1": {"group": "TVBP", "default": 2000, "validator": QIntValidator(), "interval": 3, "field": "T1"},
+            "TVF_3_T2": {"group": "TVBP", "default": 4000, "validator": QIntValidator(), "interval": 3, "field": "T2"},
             "TVF_3_F1": {"group": "TVBP", "default": 10, "validator": QIntValidator(), "interval": 3, "field": "F1"},
             "TVF_3_F2": {"group": "TVBP", "default": 12, "validator": QIntValidator(), "interval": 3, "field": "F2"},
             "TVF_3_F3": {"group": "TVBP", "default": 50, "validator": QIntValidator(), "interval": 3, "field": "F3"},
@@ -92,7 +92,7 @@ class ParametersTab(QWidget):
             ("P3", "Bottom Left", (0, 1), "Bottom left corner coordinates")
         ]
         
-        # Define linked parameter relationships (target -> source)
+        # Define linked parameter relationships 
         self.LINKED_PARAMS = {
             "Trace_P3": "Trace_P1",
             "TWT_P2": "TWT_P1",
@@ -508,6 +508,7 @@ class ParametersTab(QWidget):
         # Enable/disable checkbox
         tvf_hbox = QHBoxLayout()
         self.tvf_enable_checkbox = QCheckBox("Enable Time-Variant Bandpass", self)
+        self.tvf_enable_checkbox.setChecked(False)  # Disabled by default
         tvf_hbox.addWidget(self.tvf_enable_checkbox)
         tvf_hbox.addStretch()
         parent_layout.addLayout(tvf_hbox)
@@ -533,14 +534,11 @@ class ParametersTab(QWidget):
         for interval in range(1, 4):
             row = interval
             fields = []
-            
-            # Create all fields for this interval
             for col, field in enumerate(["T1", "T2", "F1", "F2", "F3", "F4"]):
                 param_id = f"TVF_{interval}_{field}"
                 input_field = self._create_parameter_input(param_id, width=60)
                 self.tvf_grid.addWidget(input_field, row, col)
                 fields.append(input_field)
-            
             self.tvf_intervals.append(fields)
 
         parent_layout.addWidget(self.tvf_container)
@@ -553,16 +551,21 @@ class ParametersTab(QWidget):
 
     def _on_tvf_enable_toggled(self, checked):
         """Handle enabling/disabling the time-variant bandpass filter."""
-        # Simply show/hide the container - parameters always exist
         self.tvf_container.setVisible(checked)
+        if checked:
+            # Autofill TVBP fields with defaults if empty
+            for interval in range(1, 4):
+                for col, field in enumerate(["T1", "T2", "F1", "F2", "F3", "F4"]):
+                    param_id = f"TVF_{interval}_{field}"
+                    widget = self.param_widgets.get(param_id)
+                    default_val = self.PARAMETERS[param_id]["default"]
+                    if widget is not None and not widget.text():
+                        widget.setText(str(default_val))
         
     def _add_tvf_interval(self, values=None):
         """Add a new interval row. Optionally populate with values dict."""
         row = len(self.tvf_intervals) + 1  # +1 for header row
         fields = []
-        
-        # Create input fields consistently using the parameter factory
-        # Though we don't register them immediately as they need special handling
         
         # Create Start time field (t1)
         t1 = QLineEdit(self)
@@ -749,7 +752,8 @@ class ParametersTab(QWidget):
         
         # Block signals to prevent autofill during loading
         self.tvf_enable_checkbox.blockSignals(True)
-        self.tvf_enable_checkbox.setChecked(has_tvf_params)
+        # Only check if TVF_ENABLED is set to "1" (not just if TVF params exist)
+        self.tvf_enable_checkbox.setChecked(tvf_enabled)
         self.tvf_enable_checkbox.blockSignals(False)
         
         # Set up TVF intervals if enabled
@@ -774,8 +778,18 @@ class ParametersTab(QWidget):
                 for j in range(4):
                     self.param_widgets[f"TVF_{interval_id}_F{j+1}"] = self.tvf_intervals[i][j+2]
             
-            self.tvf_container.setVisible(True)
+            # Only show the grid if enabled
+            self.tvf_container.setVisible(tvf_enabled)
             self._setup_linked_parameter_handlers()
+        else:
+            # Hide TVF container and clear fields if not enabled
+            self.tvf_container.setVisible(False)
+            for interval in range(1, 4):
+                for col, field in enumerate(["T1", "T2", "F1", "F2", "F3", "F4"]):
+                    param_id = f"TVF_{interval}_{field}"
+                    widget = self.param_widgets.get(param_id)
+                    if widget is not None:
+                        widget.clear()
 
         self.next_button.setEnabled(False)
     

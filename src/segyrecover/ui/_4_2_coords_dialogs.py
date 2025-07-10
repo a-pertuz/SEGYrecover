@@ -18,10 +18,13 @@ class SimpleNavigationToolbar(NavigationToolbar):
     """Simplified navigation toolbar with only Home, Pan and Zoom tools."""
     
     # Define which tools to keep
-    toolitems = [t for t in NavigationToolbar.toolitems if t[0] in ('Home', 'Pan', 'Zoom')]
+    toolitems = [t for t in NavigationToolbar.toolitems if t[0] in ('Home', 'Pan', 'Zoom', 'Save')]
     
     def __init__(self, canvas, parent):
         super().__init__(canvas, parent)
+        
+        # Configure the toolbar to show text labels
+        self.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
 
 class CoordinateAssignmentDialog(QDialog):
     """Dialog for assigning coordinates to traces with geographic direction detection."""

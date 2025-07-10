@@ -29,6 +29,9 @@ class SimpleNavigationToolbar(NavigationToolbar):
     
     def __init__(self, canvas, parent):
         super().__init__(canvas, parent)
+        
+        # Configure the toolbar to show text labels
+        self.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
 
 class DigitizationTab(QWidget):
     """Tab for digitizing the seismic section."""

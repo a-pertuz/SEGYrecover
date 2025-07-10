@@ -23,10 +23,14 @@ from ..utils.console_utils import section_header, success_message, error_message
 class SimpleNavigationToolbar(NavigationToolbar):
     """Simplified navigation toolbar with only Home, Pan and Zoom tools."""
     
+    # Define which tools to keep
     toolitems = [t for t in NavigationToolbar.toolitems if t[0] in ('Home', 'Pan', 'Zoom', 'Save')]
     
     def __init__(self, canvas, parent):
         super().__init__(canvas, parent)
+        
+        # Configure the toolbar to show text labels
+        self.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
 
 class ResultsTab(QWidget):
     """Tab for displaying results of the digitization process."""

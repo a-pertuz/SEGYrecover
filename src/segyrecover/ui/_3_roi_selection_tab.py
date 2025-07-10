@@ -4,7 +4,7 @@ import os
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, 
-    QGroupBox, QSplitter, QMessageBox, QDialog
+    QGroupBox, QSplitter, QMessageBox, QDialog, QTabWidget
 )
 from PySide6.QtGui import QIcon
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
@@ -23,6 +23,9 @@ class SimpleNavigationToolbar(NavigationToolbar):
     
     def __init__(self, canvas, parent):
         super().__init__(canvas, parent)
+        
+        # Set toolbar to show text labels next to icons
+        self.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
 
 
 class ROISelectionTab(QWidget):
@@ -87,38 +90,51 @@ class ROISelectionTab(QWidget):
         self.instruction_label.setObjectName("description_label")
         self.instruction_label.setWordWrap(True)
         layout.addWidget(self.instruction_label)
-        
+
         # Status label
         self.status_label = QLabel("")
         self.status_label.setObjectName("status_label")
         layout.addWidget(self.status_label)
         
-        # Main content area with splitter
-        splitter = QSplitter(Qt.Horizontal)
-        splitter.setObjectName("content_splitter")
-        splitter.setHandleWidth(6)  
+        # Create visualization tabs container - similar to digitization tab
+        visualization_container = QGroupBox("Image Processing")
+        visualization_container.setObjectName("visualization_container")
+        visualization_layout = QVBoxLayout(visualization_container)
+        visualization_layout.setContentsMargins(10,10,10,10)
         
-        # Left panel - Original image with point selection
-        original_container = QGroupBox("Original Image")
-        original_container.setObjectName("original_image_container")
-        original_layout = QVBoxLayout(original_container)
-        original_layout.setContentsMargins(15, 15, 15, 15)
+        # Create tab widget
+        self.tab_widget = QTabWidget()
+        self.tab_widget.setObjectName("roi_visualization_tabs")
+        
+        # Tab 1: Original image with point selection
+        original_tab = QWidget()
+        # Change to horizontal layout to place buttons to the right of the canvas
+        original_layout = QHBoxLayout(original_tab)
+        original_layout.setContentsMargins(10, 10, 10, 10)
         original_layout.setSpacing(10)
         
+        # Left side - Canvas and toolbar in a vertical layout
+        canvas_container = QWidget()
+        canvas_layout = QVBoxLayout(canvas_container)
+        canvas_layout.setContentsMargins(0, 0, 0, 0)
+        canvas_layout.setSpacing(5)
+        
         # Canvas and toolbar for original image
-        original_layout.addWidget(self.canvas)
+        canvas_layout.addWidget(self.canvas, 1)  # Add stretch factor to expand canvas
         self.toolbar = SimpleNavigationToolbar(self.canvas, self)
         self.toolbar.setObjectName("roi_original_toolbar")
-        original_layout.addWidget(self.toolbar)
+        canvas_layout.addWidget(self.toolbar)
         
-        # Point selection buttons 
-        points_group = QGroupBox("Select Corner Points")
-        points_group.setObjectName("corner_points_group")
-        points_layout = QHBoxLayout(points_group)
-        points_layout.setContentsMargins(15, 15, 15, 15)
-        points_layout.setSpacing(10)
+        # Add canvas container to main layout with stretch factor
+        original_layout.addWidget(canvas_container, 3)  # Canvas gets 3/4 of space
         
-        # Create point selection buttons
+        # Right side - Point selection buttons in a vertical layout
+        controls_container = QWidget()
+        controls_layout = QVBoxLayout(controls_container)
+        controls_layout.setContentsMargins(0, 0, 0, 0)
+        controls_layout.setSpacing(5)
+        
+        # Create point selection buttons directly in the controls layout
         self.point_buttons = []
         self.point_labels = ["Top-Left (1)", "Top-Right (2)", "Bottom-Left (3)"]
         
@@ -126,38 +142,44 @@ class ROISelectionTab(QWidget):
             button = QPushButton(label)
             button.setObjectName(f"point_button_{i+1}")
             button.setToolTip(f"Click to select the {label.split('(')[0].strip()} corner of the region")
-            button.setMinimumWidth(120)
             button.setFixedHeight(36)
             button.clicked.connect(lambda checked, idx=i: self.activate_point_selection(idx))
-            points_layout.addWidget(button)
+            controls_layout.addWidget(button)
             self.point_buttons.append(button)
         
-        original_layout.addWidget(points_group)
+        # Cancel selection button (always visible but initially disabled)
+        self.cancel_selection_button = QPushButton("Cancel Selection")
+        self.cancel_selection_button.setObjectName("cancel_selection_button")
+        self.cancel_selection_button.setToolTip("Cancel the current point selection")
+        self.cancel_selection_button.setFixedHeight(36)
+        self.cancel_selection_button.clicked.connect(self.cancel_point_selection)
+        self.cancel_selection_button.setStyleSheet("background-color: #f0f0f0; color: #666666; border: 1px solid #999999;")
+        self.cancel_selection_button.setEnabled(False)  # Initially disabled
+        controls_layout.addWidget(self.cancel_selection_button)
         
-        # Retry button for point selection with icon
-        retry_button_layout = QHBoxLayout()
-        retry_button_layout.addStretch()
+        # Reduce spacing between buttons and the retry button
+        controls_layout.setSpacing(3)
         
-        self.retry_selection_button = QPushButton()
-        self.retry_selection_button.setIcon(QIcon.fromTheme("edit-undo", QIcon.fromTheme("refresh")))
-        self.retry_selection_button.setText("Retry")
+        # Retry button with red styling
+        self.retry_selection_button = QPushButton("Retry Selection")
+        self.retry_selection_button.setIcon(QIcon.fromTheme("edit-undo"))
         self.retry_selection_button.setObjectName("retry_selection_button")
         self.retry_selection_button.clicked.connect(self.retry_selection)
         self.retry_selection_button.setEnabled(False)
-        self.retry_selection_button.setFixedWidth(80)
         self.retry_selection_button.setFixedHeight(36)
         self.retry_selection_button.setToolTip("Reset all corner points and start selection again")
+        self.retry_selection_button.setStyleSheet("background-color: #ffcccc; color: #cc0000; border: 1px solid #cc0000;")
         
-        retry_button_layout.addWidget(self.retry_selection_button)
-        retry_button_layout.addStretch()
-        original_layout.addLayout(retry_button_layout)
+        controls_layout.addWidget(self.retry_selection_button)
+        controls_layout.addStretch(1)  # Add stretch at bottom to push buttons up
         
-        # Right panel - Rectified image
-        rectified_container = QGroupBox("Rectified Image")
-        rectified_container.setObjectName("rectified_image_container")
-        rectified_layout = QVBoxLayout(rectified_container)
-        rectified_layout.setContentsMargins(15, 15, 15, 15)
-        rectified_layout.setSpacing(10)
+        # Add controls container to main layout with reduced spacing
+        original_layout.setSpacing(5) 
+        original_layout.addWidget(controls_container, 1)  
+        
+        # Tab 2: Rectified image
+        rectified_tab = QWidget()
+        rectified_layout = QVBoxLayout(rectified_tab)
         
         # Canvas and toolbar for rectified image
         rectified_layout.addWidget(self.rectified_canvas)
@@ -165,12 +187,15 @@ class ROISelectionTab(QWidget):
         rectified_toolbar.setObjectName("roi_rectified_toolbar")
         rectified_layout.addWidget(rectified_toolbar)
         
-        # Add panels to splitter
-        splitter.addWidget(original_container)
-        splitter.addWidget(rectified_container)
-        splitter.setSizes([int(self.width() * 0.5), int(self.width() * 0.5)])
+        # Add tabs to tab widget
+        self.tab_widget.addTab(original_tab, "Original Image & Point Selection")
+        self.tab_widget.addTab(rectified_tab, "Rectified Result")
         
-        layout.addWidget(splitter, 1)  # 1 = stretch factor
+        # Add tab widget to container
+        visualization_layout.addWidget(self.tab_widget)
+        
+        # Add container to main layout (stretch factor 1)
+        layout.addWidget(visualization_container, 1)
         
         # Bottom button section
         button_container = QWidget()
@@ -261,6 +286,10 @@ class ROISelectionTab(QWidget):
             button.setEnabled(False)
             button.setStyleSheet(self.BUTTON_STYLE_DISABLED)
         
+        # Enable cancel button
+        self.cancel_selection_button.setEnabled(True)
+        self.cancel_selection_button.setStyleSheet("background-color: #ffcccc; color: #cc0000; border: 1px solid #cc0000;")
+        
         # Store the active point index
         self.active_point_index = point_idx
         self.is_selection_mode = True
@@ -284,11 +313,41 @@ class ROISelectionTab(QWidget):
                 self.toolbar.pan()
             elif self.toolbar._active == 'ZOOM':
                 self.toolbar.zoom()
-    
+
+    def cancel_point_selection(self):
+        """Cancel the current point selection process."""
+        # Disable cancel button
+        self.cancel_selection_button.setEnabled(False)
+        self.cancel_selection_button.setStyleSheet("background-color: #f0f0f0; color: #666666; border: 1px solid #999999;")
+        
+        # Reset selection state
+        self.is_selection_mode = False
+        self.active_point_index = None
+        
+        # Update status
+        self.status_label.setText("Selection canceled")
+        
+        # Re-enable toolbar
+        self.toolbar.setEnabled(True)
+        
+        # Restore previous toolbar mode
+        if hasattr(self, '_prev_toolbar_mode') and self._prev_toolbar_mode:
+            if self._prev_toolbar_mode == 'pan':
+                self.toolbar.pan()
+            elif self._prev_toolbar_mode == 'zoom':
+                self.toolbar.zoom()
+        
+        # Update UI buttons state
+        self.update_ui_state()
+
     def deactivate_point_selection(self):
         """Deactivate point selection mode."""
         self.active_point_index = None
         self.is_selection_mode = False
+        
+        # Disable cancel button
+        self.cancel_selection_button.setEnabled(False)
+        self.cancel_selection_button.setStyleSheet("background-color: #f0f0f0; color: #666666; border: 1px solid #999999;")
         
         # Update status
         self.status_label.setText("")
@@ -478,6 +537,9 @@ class ROISelectionTab(QWidget):
             # Update UI state
             self.update_ui_state()
             
+            # Switch to the rectified image tab
+            self.tab_widget.setCurrentIndex(1)
+            
             # Emit signal with points and binary image
             self.roiSelected.emit(
                 self.roi_processor.points, 
@@ -502,6 +564,14 @@ class ROISelectionTab(QWidget):
         self.update_ui_state()
         
         # Reset button styles
+        self._apply_button_styles()
+        
+        info_message(self.console, "ROI selection restarted")
+        
+        # Reset button styles
+        self._apply_button_styles()
+        
+        info_message(self.console, "ROI selection restarted")
         self._apply_button_styles()
         
         info_message(self.console, "ROI selection restarted")

@@ -98,10 +98,11 @@ The application automatically creates these folders if they don't exist.
 6. In the **Digitization** tab, click "Start Digitization" and monitor the process through visualization tabs
 7. Once complete, click "See Results" to move to the Results tab
 8. In the **Results** tab, examine the resulting SEGY file and its frequency spectrum
+9. Optionally, you can mute the topography and apply automatic gain control or trace mixing to balance amplitudes and smooth the final section
 
 ### System Requirements
 - Windows 10/11
-- At least 4GB RAM
+- At least 8GB RAM
 
 ### Common Windows Issues
 - **Program not found**: Ensure Python is added to your PATH

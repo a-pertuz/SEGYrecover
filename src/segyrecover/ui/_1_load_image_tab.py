@@ -24,6 +24,10 @@ class SimpleNavigationToolbar(NavigationToolbar):
     
     def __init__(self, canvas, parent):
         super().__init__(canvas, parent)
+        
+        # Configure the toolbar to show text labels
+        self.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
+
 
 class LoadImageTab(QWidget):
     """Tab for loading and displaying seismic images."""
@@ -288,7 +292,10 @@ class LoadImageTab(QWidget):
         self.location_ax.text(0.5, 0.5, "No geometry data available", 
                               ha='center', va='center', transform=self.location_ax.transAxes)
         self.location_figure.set_constrained_layout(True)
+        self.location_figure.set_constrained_layout(True)
         self.location_canvas.draw()
         
         # Disable next button
+        self.next_button.setEnabled(False)# Disable next button
+        self.next_button.setEnabled(False)
         self.next_button.setEnabled(False)

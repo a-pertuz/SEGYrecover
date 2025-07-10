@@ -540,6 +540,13 @@ QToolBar QToolButton:disabled {
     border-color: #e5e5e5;
 }
 
+QToolBar QToolButton:checked {
+    background-color: #3182ce;
+    color: #ffffff;
+    border: 1px solid #2b6cb0;
+    font-weight: bold;
+}
+
 /* Parameter-specific styling */
 /* Corner coordinates container in parameters tab */
 [objectName^="point_group_"] {
@@ -626,7 +633,6 @@ QTabBar::tab:selected {
 QTabBar::tab:hover:!selected {
     background-color: #edf2f7;
 }
-
 /* Radio Buttons and Checkboxes */
 QRadioButton, QCheckBox {
     spacing: 8px;
@@ -639,26 +645,40 @@ QRadioButton:disabled, QCheckBox:disabled {
     color: #a0aec0;
 }
 
+/* Base radio indicator */
 QRadioButton::indicator {
-    width: 10px;
-    height: 10px;
-    border: 2px solid #cbd5e0;
-    border-radius: 9px;
-    background-color: #ffffff;
+    width: 14px;
+    height: 14px;
+    border: 2px solid #3182ce;
+    border-radius: 7px;
+    background-color: transparent;
     margin: 1px;
 }
 
-QRadioButton::indicator:checked {
-    background-color: #ffffff;
-    border: 2px solid #3182ce;
-    background-image: radial-gradient(circle, #3182ce 0%, #3182ce 40%, transparent 45%);
-}
-
+/* Hover state */
 QRadioButton::indicator:hover {
     border-color: #2b6cb0;
     background-color: #f8fdff;
 }
 
+/* Checked state with filled circle */
+QRadioButton::indicator:checked {
+    border: 2px solid #3182ce;
+    background-color: #ffffff;
+    position: relative;
+}
+
+QRadioButton::indicator:checked::before {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 6px;
+    height: 6px;
+    background-color: #3182ce;
+    border-radius: 3px;
+}
+
+/* Disabled states */
 QRadioButton::indicator:disabled {
     background-color: #f7fafc;
     border-color: #e2e8f0;
@@ -667,7 +687,10 @@ QRadioButton::indicator:disabled {
 QRadioButton::indicator:checked:disabled {
     background-color: #f7fafc;
     border-color: #e2e8f0;
-    background-image: radial-gradient(circle, #a0aec0 0%, #a0aec0 40%, transparent 45%);
+}
+
+QRadioButton::indicator:checked:disabled::before {
+    background-color: #a0aec0;
 }
 
 QRadioButton:hover {
