@@ -293,7 +293,36 @@ View and analyze your digitized data:
 1. Digitized SEG-Y section displays in main view
 2. Amplitude spectrum shows frequency content
 3. Console provides digitization summary
-4. Click "Start New Line" for next image
+4. Additional processing options are available via buttons
+5. Click "Start New Line" for next image
+
+#### Additional Processing Options
+
+The Results tab provides several buttons for further processing and editing of your digitized SEG-Y data:
+
+**Edit SEGY Header**
+- Modify SEGY file headers including acquisition parameters and metadata
+- Useful for adding extra information
+
+**Mute Topography**
+- Interactively define a muting surface by clicking on the seismic section
+- Remove unwanted shallow data above a specified horizon
+- Apply tapering to create smooth transitions
+- Useful for removing noise above the topography, ground roll, or other unwanted noise
+
+**Apply AGC RMS**
+- Apply Automatic Gain Control using Root Mean Square method
+- Balance trace amplitudes to enhance weaker signals
+- Configurable gate length for amplitude averaging
+- Helpful for improving visibility of deeper reflections
+
+**Apply Trace Mixing**
+- Enhance signal-to-noise ratio through trace averaging
+- Choose between weighted average or median filtering methods
+- Configurable mixing window size and weights
+- Effective for attenuating random noise while preserving coherent signals
+
+Each processing option opens a dedicated dialog with preview capabilities, allowing you to see the effects before applying changes. You can choose to save results as new files or overwrite the original.
 
 #### Accessing SEG-Y Files
 - **File → Open Data Directory** → navigate to SEGY folder
@@ -303,17 +332,7 @@ View and analyze your digitized data:
 </details>
 
 <details>
-<summary><h2>🔧 Advanced Topics</h2></summary>
-
-### Menu Options
-
-#### File Menu
-- **Set Data Directory**: Change storage location
-- **Open Data Directory**: Open data folder in Explorer
-
-#### Help Menu  
-- **HOW TO**: Step-by-step help dialog
-- **About**: Software version and developer info
+<summary><h2>🔧 Troubleshooting and FAQs</h2></summary>
 
 ### Troubleshooting
 
