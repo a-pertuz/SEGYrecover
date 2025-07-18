@@ -214,12 +214,6 @@ class CoordinateAssignmentDialog(QDialog):
         
         radio = QRadioButton()
         radio.setChecked(selected)
-
-        font = radio.font()
-        font.setPointSize(10)
-        radio.setFont(font)
-        size = 15  # Increase size of the radio button
-        radio.setStyleSheet(f"QRadioButton::indicator {{ width: {size}px; height: {size}px; }}")
         
         label = QLabel(text)
         label.setTextFormat(Qt.RichText)  # Enable rich text interpretation
