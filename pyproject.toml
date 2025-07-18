@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "segyrecover"
-version = "1.0.0" 
+version = "1.1.0" 
 description = "A Python tool for digitizing scanned seismic reflection sections and converting them to standard SEGY format."
 readme = "README.md"
 requires-python = ">=3.10"
