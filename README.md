@@ -141,7 +141,7 @@ segyrecover/
 
 </details>
 
-<details open>
+<details>
 <summary><h2>🚀 Quick Start (5 Steps)</h2></summary>
 
 1. **Launch** → Run `segyrecover` and click "Start New Line"
@@ -154,7 +154,7 @@ Your SEG-Y file will be saved in the `SEGY` folder and can be loaded into interp
 
 </details>
 
-<details open>
+<details>
 <summary><h2>📚 Complete Tutorial</h2></summary>
 
 ### Step 1: Loading an Image
