@@ -253,7 +253,7 @@ class MuteTopographyDialog(QDialog):
         sample_idx = int(round(event.ydata))
         
         # Ensure indices are within data bounds
-        if trace_idx < 0 or trace_idx >= self.segy_data.shape[1] or sample_idx < 0 or sample_idx >= self.segy_data.shape[0]:
+        if trace_idx < 0 or trace_idx >= self.segy_data.shape[0] or sample_idx < 0 or sample_idx >= self.segy_data.shape[1]:
             return
         
         # Right-click to remove the nearest point

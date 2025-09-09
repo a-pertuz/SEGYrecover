@@ -251,6 +251,11 @@ class SegyRecover(QMainWindow):
         if hasattr(load_image_tab, "reset"):
             load_image_tab.reset()
             
+        # Reset the ROI selection tab
+        roi_selection_tab = self.tab_container.widget(self.tab_container.tab_indices["roi_selection"])
+        if hasattr(roi_selection_tab, "reset"):
+            roi_selection_tab.reset()
+            
         # Reset the digitization tab
         digitization_tab = self.tab_container.widget(self.tab_container.tab_indices["digitization"])
         if hasattr(digitization_tab, "reset"):

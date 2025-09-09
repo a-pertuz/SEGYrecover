@@ -332,7 +332,7 @@ class TraceMixingDialog(QDialog):
         weights_layout.addWidget(self.weights_label)
         self.weights_input = QLineEdit()
         self.weights_input.setObjectName("weights_input")
-        self.weights_input.setText("1,2,3,2,1")  # Default weights for 5-point window
+        self.weights_input.setText("0.2,0.3,1,0.3,0.2")  # Default weights for 5-point window
         weights_layout.addWidget(self.weights_input)
         params_layout.addWidget(self.weights_widget)
 

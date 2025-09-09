@@ -262,6 +262,10 @@ class LoadImageTab(QWidget):
             self.location_canvas.draw()
             
             success_message(self.console, "Geometry data loaded successfully")
+            # Info message for first and last CDP
+            if cdp:
+                info_message(self.console, f"First CDP: {cdp[0]}")
+                info_message(self.console, f"Last CDP: {cdp[-1]}")
             return True
 
         except Exception as e:

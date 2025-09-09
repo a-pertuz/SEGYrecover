@@ -128,7 +128,6 @@ class AGCRMSDialog(QDialog):
         self.suffix_input = QLineEdit()
         self.suffix_input.setObjectName("suffix_input")
         self.suffix_input.setText("_agc")  
-        self.suffix_input.setMaximumWidth(20)  
         save_file_layout.addWidget(self.suffix_input)
 
         save_layout.addLayout(save_file_layout)

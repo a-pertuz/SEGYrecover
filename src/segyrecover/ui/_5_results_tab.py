@@ -5,7 +5,7 @@ import numpy as np
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, 
-    QGroupBox, QSplitter, QComboBox, QDialog, QMessageBox
+    QGroupBox, QSplitter, QComboBox, QDialog, QMessageBox, QFrame, QSizePolicy
 )
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qtagg import NavigationToolbar2QT as NavigationToolbar
@@ -172,6 +172,13 @@ class ResultsTab(QWidget):
         self.mute_topo_button.clicked.connect(self.open_mute_topography_dialog)
         button_layout.addWidget(self.mute_topo_button)
         
+        # Trace Mixing button
+        self.trace_mixing_button = QPushButton("Apply Trace Mixing")
+        self.trace_mixing_button.setObjectName("trace_mixing_button")
+        self.trace_mixing_button.clicked.connect(self.open_trace_mixing_dialog)
+        self.trace_mixing_button.setEnabled(False)
+        button_layout.addWidget(self.trace_mixing_button)
+
         # AGC RMS button
         self.agc_rms_button = QPushButton("Apply AGC RMS")
         self.agc_rms_button.setObjectName("agc_rms_button")
@@ -179,13 +186,18 @@ class ResultsTab(QWidget):
         self.agc_rms_button.setEnabled(False)
         button_layout.addWidget(self.agc_rms_button)
         
-        # Trace Mixing button
-        self.trace_mixing_button = QPushButton("Apply Trace Mixing")
-        self.trace_mixing_button.setObjectName("trace_mixing_button")
-        self.trace_mixing_button.clicked.connect(self.open_trace_mixing_dialog)
-        self.trace_mixing_button.setEnabled(False)
-        button_layout.addWidget(self.trace_mixing_button)
-        
+        # Add a spacer to push buttons to the top
+        spacer = QWidget()
+        spacer.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        button_layout.addWidget(spacer)
+
+        # Add a horizontal line
+        line = QFrame() # Create a horizontal line          
+        line.setFrameShape(QFrame.HLine)
+        line.setFrameShadow(QFrame.Sunken)
+        line.setObjectName("horizontal_line")
+        button_layout.addWidget(line)
+
         # New line button
         new_line_button = QPushButton("Start New Line")
         new_line_button.setObjectName("start_new_button")

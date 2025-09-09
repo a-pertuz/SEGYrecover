@@ -575,5 +575,40 @@ class ROISelectionTab(QWidget):
         self._apply_button_styles()
         
         info_message(self.console, "ROI selection restarted")
+    
+    def reset(self):
+        """Reset the ROI selection tab to its initial state."""
+        # Clear points in the processor
+        self.roi_processor.clear_points()
+        self.active_point_index = None
+        self.is_selection_mode = False
+
+        # Reset instruction and status labels
+        self.instruction_label.setText(
+            "Select the three corner points of your seismic section in this order:\n"
+            "1. Top-Left, 2. Top-Right, 3. Bottom-Left. The fourth point will be calculated automatically."
+        )
+        self.status_label.setText("")
+
+        # Reset buttons
+        self.next_button.setEnabled(False)
+        self.retry_selection_button.setEnabled(False)
+        self.cancel_selection_button.setEnabled(False)
+        self._apply_button_styles()
+
+        # Clear and update image canvas
+        self.ax.clear()
+        if hasattr(self.roi_processor, "display_image") and self.roi_processor.display_image is not None:
+            self.ax.imshow(self.roi_processor.display_image, cmap='gray', aspect='equal')
+        self.ax.set_title("Original Image - Select Points")
+        self.canvas.draw()
+
+        # Clear rectified image canvas
+        self.rectified_ax.clear()
+        self.rectified_ax.set_title("Rectified Image (select ROI first)")
+        self.rectified_canvas.draw()
+
+        # Switch to the first tab
+        self.tab_widget.setCurrentIndex(0)
 
 
