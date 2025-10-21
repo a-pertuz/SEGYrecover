@@ -148,7 +148,7 @@ class SegyFileWriter:
             out = seisio.output( 
                 segy_path, 
                 ns=ns, 
-                vsi=int(DT * 1000), 
+                vsi=float(DT * 1000),   # MUST be float - seisio library checks .is_integer()
                 endian=">", 
                 format=5, 
                 txtenc="ebcdic"
