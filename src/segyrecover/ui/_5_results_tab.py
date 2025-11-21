@@ -247,7 +247,7 @@ class ResultsTab(QWidget):
             perc=100, 
             haxis="tracf", 
             hlabel="Trace no.", 
-            vlabel="Time (ms)",
+            vlabel="Sample no.",
             ax=self.segy_ax,
         )
         

@@ -1,0 +1,11 @@
+v1.2.0
+Major: 
+Extract amplitudes between consecutive baselines with negative amplitude handling:
+        - If baseline is on WHITE pixel:
+          - Check next pixel to the right
+          - If next is also WHITE: count WHITE pixels to the LEFT until black or previous baseline
+          - If next is BLACK: count black pixels to the right until white or next baseline
+        - If baseline is on BLACK pixel: count black pixels to the right as before
+
+Minor:
+Fix y-axis label that displayed "Time (ms)" instead of "Sample number"
