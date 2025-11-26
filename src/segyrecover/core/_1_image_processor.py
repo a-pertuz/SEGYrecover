@@ -15,94 +15,94 @@ class ImageProcessor:
         self.console = console
         self.work_dir = work_dir
 
-    def remove_timelines(self, image_a, HE, HLT, TPT):
+    def remove_timelines(self, image_input, HE, HLT, TPT):
         """Timeline removal algorithm """
 
         info_message(self.console, "Detecting and removing timelines...")
         self.progress.start("Detecting timelines...", 6)
 
         try:
-            #self._save_image_array(image_a, "image_a")
+            #self._save_image_array(image_input, "image_input")
             
-            image_b = image_a.copy()
-            self._erosion_left(image_b, HE)
-            #self._save_image_array(image_b, "image_b")
+            image_eroded_left = image_input.copy()
+            self._erosion_left(image_eroded_left, HE)
+            #self._save_image_array(image_eroded_left, "image_eroded_left")
             self.progress.update(1)
 
-            image_c = image_b.copy()
-            self._remove_vertical_segments(image_c, HLT)
-            #self._save_image_array(image_c, "image_c")
+            image_no_short_segments = image_eroded_left.copy()
+            self._remove_vertical_segments(image_no_short_segments, HLT)
+            #self._save_image_array(image_no_short_segments, "image_no_short_segments")
             self.progress.update(2)
 
-            image_d = image_c.copy()
-            self._erosion_right(image_d, HE)
-            #self._save_image_array(image_d, "image_d")
+            image_eroded_both = image_no_short_segments.copy()
+            self._erosion_right(image_eroded_both, HE)
+            #self._save_image_array(image_eroded_both, "image_eroded_both")
             self.progress.update(3)
 
             # Detect timelines using histogram and extend them
             threshold_percentage = TPT / 100.0  
-            image_f = self._detect_and_extend_timelines(image_d, threshold_percentage)
+            image_timelines = self._detect_and_extend_timelines(image_eroded_both, threshold_percentage)
             
-            #image_f = image_c.copy()
+            #image_timelines = image_no_short_segments.copy()
 
             # Apply vertical dilation to make lines slightly thicker
-            self._dilation_top(image_f, max(1, int(HLT/2)))
-            self._dilation_bottom(image_f, max(1, int(HLT/2)))
-            #self._save_image_array(image_f, "image_f")
+            self._dilation_top(image_timelines, max(1, int(HLT/2)))
+            self._dilation_bottom(image_timelines, max(1, int(HLT/2)))
+            #self._save_image_array(image_timelines, "image_timelines")
             self.progress.update(4)
 
-            image_e = image_a.copy()
-            self._remove_vertical_segments(image_e, HLT)
-            #self._save_image_array(image_e, "image_e")
+            image_input_no_segments = image_input.copy()
+            self._remove_vertical_segments(image_input_no_segments, HLT)
+            #self._save_image_array(image_input_no_segments, "image_input_no_segments")
             self.progress.update(5)
 
-            image_g = image_a.copy()
-            image_g[(image_e == 0) & (image_f == 0)] = 255
-            self._save_image_array(image_g, "image_g")
+            image_clean = image_input.copy()
+            image_clean[(image_input_no_segments == 0) & (image_timelines == 0)] = 255
+            self._save_image_array(image_clean, "image_clean")
 
             self.progress.finish()
-            return image_g, image_f
+            return image_clean, image_timelines
         
         except Exception as e:
             error_message(self.console, f"Error removing timelines: {e}")
             return None, None
 
-    def detect_baselines(self, image_g, TLT, BDB, BDE, BFT):
+    def detect_baselines(self, image_clean, TLT, BDB, BDE, BFT):
         """Detect vertical baselines in image"""
         info_message(self.console, "Detecting baselines...")
         self.progress.start("Detecting baselines...", 10)
 
         try:
-            #self._save_image_array(image_g, "image_g_baseline_input")
+            #self._save_image_array(image_clean, "image_clean_baseline_input")
             
             # 1. Enhance baselines through morphological operations
-            image_i = image_g.copy()
-            self._erosion_left(image_i, TLT)  
-            #self._save_image_array(image_i, "image_i")
+            image_baseline_eroded_left = image_clean.copy()
+            self._erosion_left(image_baseline_eroded_left, TLT)  
+            #self._save_image_array(image_baseline_eroded_left, "image_baseline_eroded_left")
             self.progress.update(1)
 
-            image_j = image_i.copy()
-            self._erosion_top(image_j, TLT)  
-            #self._save_image_array(image_j, "image_j")
+            image_baseline_eroded_top = image_baseline_eroded_left.copy()
+            self._erosion_top(image_baseline_eroded_top, TLT)  
+            #self._save_image_array(image_baseline_eroded_top, "image_baseline_eroded_top")
             self.progress.update(2)
 
-            image_k = image_j.copy()
-            self._dilation_top(image_k, TLT) 
-            #self._save_image_array(image_k, "image_k")
+            image_baseline_dilated_top = image_baseline_eroded_top.copy()
+            self._dilation_top(image_baseline_dilated_top, TLT) 
+            #self._save_image_array(image_baseline_dilated_top, "image_baseline_dilated_top")
             self.progress.update(3)
 
-            image_l = image_k.copy()
-            self._dilation_left(image_l, TLT)  
-            #self._save_image_array(image_l, "image_l")
+            image_baseline_dilated_left = image_baseline_dilated_top.copy()
+            self._dilation_left(image_baseline_dilated_left, TLT)  
+            #self._save_image_array(image_baseline_dilated_left, "image_baseline_dilated_left")
             self.progress.update(4)
 
-            image_m = image_l.copy()
-            self._dilation_left(image_m, TLT)              
-            image_m[(image_l == 0)] = 255 
-            #self._save_image_array(image_m, "image_m")
+            image_baselines = image_baseline_dilated_left.copy()
+            self._dilation_left(image_baselines, TLT)              
+            image_baselines[(image_baseline_dilated_left == 0)] = 255 
+            #self._save_image_array(image_baselines, "image_baselines")
             self.progress.update(5)
 
-            image_processed = image_m.copy()
+            image_processed = image_baselines.copy()
 
             # 2. Find transitions
             height, width = image_processed.shape
@@ -136,7 +136,7 @@ class ImageProcessor:
             self._save_baselines(final_baselines, "final_baselines")
 
             self.progress.finish()
-            return image_m, raw_baselines, clean_baselines, final_baselines
+            return image_baselines, raw_baselines, clean_baselines, final_baselines
 
         except Exception as e:
             error_message(self.console, f"Error in baseline detection: {str(e)}")

@@ -22,16 +22,17 @@ The `ImageProcessor` class provides tools for processing seismic images, particu
 
 #### Main Processing Methods
 
-- **remove_timelines(image_a, HE, HLT)**: Removes horizontal timeline elements from seismic images.
+- **remove_timelines(image_input, HE, HLT, TPT)**: Removes horizontal timeline elements from seismic images.
   - Parameters:
-    - `image_a`: Input image array
+    - `image_input`: Input image array
     - `HE`: Erosion parameter
     - `HLT`: Horizontal line thickness
+    - `TPT`: Timeline detection percentage threshold
   - Returns: Processed image with timelines removed and mask of timeline positions
 
-- **detect_baselines(image_g, TLT, BDB, BDE, BFT)**: Detects vertical baselines in the image.
+- **detect_baselines(image_clean, TLT, BDB, BDE, BFT)**: Detects vertical baselines in the image.
   - Parameters:
-    - `image_g`: Input image (typically output from remove_timelines)
+    - `image_clean`: Input image (typically output from remove_timelines)
     - `TLT`: Timeline thickness parameter
     - `BDB`: Baseline detection begin row
     - `BDE`: Baseline detection end row

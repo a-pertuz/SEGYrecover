@@ -38,9 +38,9 @@ class DigitizationProcessor:
         
         # Processing results
         self.processing_results = {
-            'image_f': None,  # Timeline detection 
-            'image_g': None,  # Image with timelines removed
-            'image_m': None,  # Baseline detection
+            'image_timelines': None,  # Timeline detection 
+            'image_clean': None,  # Image with timelines removed
+            'image_baselines': None,  # Baseline detection
             'raw_amplitude': None,
             'processed_amplitude': None,
             'resampled_amplitude': None,
@@ -146,7 +146,7 @@ class DigitizationProcessor:
     def _remove_timelines(self, step_callback=None):
         """ Step 1: Remove timelines. """
         
-        image_g, image_f = self.image_processor.remove_timelines(
+        image_clean, image_timelines = self.image_processor.remove_timelines(
             self.binary_rectified_image,
             self.parameters["HE"],
             self.parameters["HLT"],
@@ -154,20 +154,20 @@ class DigitizationProcessor:
         )
         
         # Store results
-        self.processing_results['image_f'] = image_f
-        self.processing_results['image_g'] = image_g
+        self.processing_results['image_timelines'] = image_timelines
+        self.processing_results['image_clean'] = image_clean
         
         # Call callback if provided
         if step_callback:
-            step_callback(0, {'image_f': image_f, 'image_g': image_g})
+            step_callback(0, {'image_timelines': image_timelines, 'image_clean': image_clean})
         
         return True
     
     def _detect_baselines(self, step_callback=None):
         """ Step 2: Detect baselines."""
         
-        image_m, raw_baselines, clean_baselines, final_baselines = self.image_processor.detect_baselines(
-            self.processing_results['image_g'],
+        image_baselines, raw_baselines, clean_baselines, final_baselines = self.image_processor.detect_baselines(
+            self.processing_results['image_clean'],
             self.parameters["TLT"],
             self.parameters["BDB"],
             self.parameters["BDE"],
@@ -180,12 +180,12 @@ class DigitizationProcessor:
         info_message(self.console, f"Final baselines: {len(final_baselines)}")
         
         # Store results
-        self.processing_results['image_m'] = image_m
+        self.processing_results['image_baselines'] = image_baselines
         self.final_baselines = final_baselines
         
         # Call callback if provided
         if step_callback:
-            step_callback(1, {'image_m': image_m, 'final_baselines': final_baselines})
+            step_callback(1, {'image_baselines': image_baselines, 'final_baselines': final_baselines})
         
         return True
     
@@ -193,7 +193,7 @@ class DigitizationProcessor:
         """ Step 3: Extract amplitudes. """
         
         raw_amplitude = self.amplitude_extractor.extract_amplitude(
-            self.processing_results['image_g'], 
+            self.processing_results['image_clean'], 
             self.final_baselines
         )
         

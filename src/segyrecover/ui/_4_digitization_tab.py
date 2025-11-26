@@ -52,10 +52,10 @@ class DigitizationTab(QWidget):
         
         # Visualization state for storing intermediate and final images/data
         self.visualization_data = {
-            'image_a': None,  # Original rectified image
-            'image_f': None,  # Timeline detection result
-            'image_g': None,  # Image with timelines removed
-            'image_m': None,  # Baseline detection result
+            'image_input': None,  # Original rectified image
+            'image_timelines': None,  # Timeline detection result
+            'image_clean': None,  # Image with timelines removed
+            'image_baselines': None,  # Baseline detection result
             'raw_amplitude': None,
             'processed_amplitude': None,
             'resampled_amplitude': None,
@@ -231,7 +231,7 @@ class DigitizationTab(QWidget):
             
             self.tab_widget.addTab(tab_content, config['title'])
         
-        self._update_visualization_tab('original', self.visualization_data.get('image_a'))
+        self._update_visualization_tab('original', self.visualization_data.get('image_input'))
     
     def _update_visualization_tab(self, tab_id, data):
         """Update the specified visualization tab with the given data."""
@@ -355,10 +355,10 @@ class DigitizationTab(QWidget):
         """Callback for when a processing step is completed. Updates visualizations."""
         # Update visualizations based on the step
         if step_index == 0:  # Timeline Removal
-            self._update_visualization_tab('timelines', step_results.get('image_f'))
-            self._update_visualization_tab('processed', step_results.get('image_g'))
+            self._update_visualization_tab('timelines', step_results.get('image_timelines'))
+            self._update_visualization_tab('processed', step_results.get('image_clean'))
         elif step_index == 1:  # Baseline Detection
-            self._update_visualization_tab('debug_baselines', step_results.get('image_m'))
+            self._update_visualization_tab('debug_baselines', step_results.get('image_baselines'))
         elif step_index == 3:  # Data Processing
             self._update_visualization_tab('filtered_data', step_results.get('filtered_data'))
     
@@ -379,7 +379,7 @@ class DigitizationTab(QWidget):
         """Update with data from previous tabs and enable digitization if ready."""
         self.digitization_processor.set_data(image_path, binary_rectified_image, parameters)
         
-        self.visualization_data['image_a'] = binary_rectified_image
+        self.visualization_data['image_input'] = binary_rectified_image
         
         if binary_rectified_image is not None:
             self._update_visualization_tab('original', binary_rectified_image)
