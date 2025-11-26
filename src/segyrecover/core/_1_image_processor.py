@@ -15,8 +15,8 @@ class ImageProcessor:
         self.console = console
         self.work_dir = work_dir
 
-    def remove_timelines(self, image_a, HE, HLT):
-        """Timeline removal algorithm"""
+    def remove_timelines(self, image_a, HE, HLT, TPT):
+        """Timeline removal algorithm """
 
         info_message(self.console, "Detecting and removing timelines...")
         self.progress.start("Detecting timelines...", 6)
@@ -39,7 +39,13 @@ class ImageProcessor:
             #self._save_image_array(image_d, "image_d")
             self.progress.update(3)
 
-            image_f = image_d.copy()
+            # Detect timelines using histogram and extend them
+            threshold_percentage = TPT / 100.0  
+            image_f = self._detect_and_extend_timelines(image_d, threshold_percentage)
+            
+            #image_f = image_c.copy()
+
+            # Apply vertical dilation to make lines slightly thicker
             self._dilation_top(image_f, max(1, int(HLT/2)))
             self._dilation_bottom(image_f, max(1, int(HLT/2)))
             #self._save_image_array(image_f, "image_f")
@@ -52,7 +58,7 @@ class ImageProcessor:
 
             image_g = image_a.copy()
             image_g[(image_e == 0) & (image_f == 0)] = 255
-            #self._save_image_array(image_g, "image_g")
+            self._save_image_array(image_g, "image_g")
 
             self.progress.finish()
             return image_g, image_f
@@ -127,7 +133,7 @@ class ImageProcessor:
 
             #self._save_baselines(raw_baselines, "raw_baselines")
             #self._save_baselines(clean_baselines, "clean_baselines")
-            #self._save_baselines(final_baselines, "final_baselines")
+            self._save_baselines(final_baselines, "final_baselines")
 
             self.progress.finish()
             return image_m, raw_baselines, clean_baselines, final_baselines
@@ -265,6 +271,32 @@ class ImageProcessor:
             for start, end in zip(segment_starts, segment_ends):
                 if (end - start) > px:
                     image[start:end, col] = 255  # Convert the segment to white
+
+    def _detect_and_extend_timelines(self, image, threshold_percentage):
+        """
+        Detect timeline rows using horizontal histogram and extend them fully.
+        """
+        height, width = image.shape
+        
+        # 1. Create horizontal histogram (count black pixels per row)
+        black_pixels_per_row = np.sum(image == 0, axis=1)
+        
+        # 2. Calculate threshold (rows with at least X% of black pixels)
+        threshold = width * threshold_percentage
+        
+        # 3. Detect timeline rows
+        timeline_rows = black_pixels_per_row >= threshold
+        
+        # 4. Create output image with extended timelines
+        result = np.ones_like(image) * 255  # Start with white image
+
+
+        # 5. For each detected timeline row, fill the entire row with black
+        for row_idx in np.where(timeline_rows)[0]:
+            result[row_idx, :] = 0
+
+    
+        return result
 
 
 # _save_image_array and _save_baselines methods can be used to save intermediate results

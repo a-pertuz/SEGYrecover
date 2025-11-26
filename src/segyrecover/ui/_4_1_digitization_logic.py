@@ -149,7 +149,8 @@ class DigitizationProcessor:
         image_g, image_f = self.image_processor.remove_timelines(
             self.binary_rectified_image,
             self.parameters["HE"],
-            self.parameters["HLT"]
+            self.parameters["HLT"],
+            self.parameters.get("TPT")  
         )
         
         # Store results

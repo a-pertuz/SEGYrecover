@@ -61,6 +61,8 @@ class ParametersTab(QWidget):
                    "label": "Baseline Detection End", "tooltip": "End of baseline detection range (pixels from top)"},
             "BFT": {"group": "Detection", "default": 80, "validator": QIntValidator(), 
                    "label": "Baseline Filter Threshold", "tooltip": "Threshold value (0-100) for baseline filtering"},
+            "TPT": {"group": "Detection", "default": 30, "validator": QIntValidator(), 
+                   "label": "Timeline Percentage Threshold", "tooltip": "Percentage of black pixels (0-100) to detect timeline rows"},
                    
             # TVBP parameters - explicitly define all interval fields
             "TVF_1_T1": {"group": "TVBP", "default": 0, "validator": QIntValidator(), "interval": 1, "field": "T1"},
@@ -646,6 +648,7 @@ class ParametersTab(QWidget):
             (param_values["BDB"] < param_values["BDE"], "BDB must be < BDE"),
             (param_values["BDB"] >= 0, "BDB must be >= 0"),
             (param_values["BFT"] >= 0 and param_values["BFT"] <= 100, "BFT must be between 0 and 100"),
+            (param_values["TPT"] >= 0 and param_values["TPT"] <= 100, "TPT must be between 0 and 100"),
             (param_values["TLT"] > 0, "Timeline thickness must be > 0"),
             (param_values["HLT"] > 0, "Horizontal line thickness must be > 0"),
             (param_values["HE"] > 0, "Horizontal erosion must be > 0"),

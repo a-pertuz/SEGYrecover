@@ -18,9 +18,94 @@ class AmplitudeExtractor:
         # Store intermediate results for visualization
         self.intermediate_results = {}
 
+
+    def extract_amplitude_only_black(self, image, baselines):
+        """
+        Extract amplitudes between consecutive baselines with improved logic:
+        - If baseline is on WHITE pixel:
+          - Check next pixel to the right
+          - If next is also WHITE: count = 0 (no amplitude)
+          - If next is BLACK: count black pixels until white or next baseline
+        - If baseline is on BLACK pixel: count black pixels as before
+        - Stop counting when: reach next baseline, or find WHITE pixel (unless WHITE is followed by BLACK)
+        """
+        info_message(self.console, "Extracting trace amplitude with improved white pixel handling...")
+        self.progress.start("Extracting amplitude...", image.shape[0])
+
+        try:
+            black_pixel_mask = (image == 0)
+            amplitude_list = []
+
+            # Count black pixels between consecutive baselines
+            for row in range(image.shape[0]):
+                row_counts = []
+                
+                for i in range(len(baselines) - 1):
+                    baseline_col = baselines[i]
+                    next_baseline_col = baselines[i + 1]
+                    
+                    if baseline_col >= image.shape[1]:
+                        row_counts.append(0)
+                        continue
+                    
+                    # Check if baseline is on BLACK or WHITE pixel
+                    if image[row, baseline_col] == 0:  # BLACK pixel
+                        # Count black pixels between baselines
+                        count = np.sum(black_pixel_mask[row, baseline_col:next_baseline_col]) * 100
+                        row_counts.append(count)
+                    else:  # WHITE pixel
+                        # Check next pixel to the right
+                        if baseline_col + 1 < image.shape[1]:
+                            next_pixel = image[row, baseline_col + 1]
+                            
+                            if next_pixel == 255:  # Next is also WHITE
+                                row_counts.append(0)
+                            else:  # Next is BLACK
+                                # Count black pixels until white (not followed by black) or next baseline
+                                count = 0
+                                col = baseline_col + 1
+                                
+                                while col < next_baseline_col and col < image.shape[1]:
+                                    if image[row, col] == 0:  # BLACK pixel
+                                        count += 1
+                                        col += 1
+                                    else:  # WHITE pixel found
+                                        # Check if white is followed by black
+                                        if col + 1 < image.shape[1] and image[row, col + 1] == 0:
+                                            # White followed by black, continue counting
+                                            col += 1
+                                        else:
+                                            # White not followed by black, stop counting
+                                            break
+                                
+                                row_counts.append(count * 100)
+                        else:
+                            row_counts.append(0)
+                
+                # Duplicate the last trace to maintain original trace count
+                if len(row_counts) > 0:
+                    row_counts.append(row_counts[-1])
+                
+                amplitude_list.append(row_counts)
+                
+                self.progress.update(row)
+
+                if self.progress.wasCanceled():
+                    return None
+
+            amplitude = np.array(amplitude_list, dtype=float)
+            info_message(self.console, f"Extracted amplitude shape: {amplitude.shape}")
+
+            self.progress.finish()
+            return amplitude
+
+        except Exception as e:
+            error_message(self.console, f"Error extracting amplitude: {str(e)}")
+            return None
+
     def extract_amplitude(self, image, baselines):
         """
-        Extract amplitudes between consecutive baselines with negative amplitude handling:
+        Extract amplitudes between consecutive baselines with full white pixel handling:
         - If baseline is on WHITE pixel:
           - Check next pixel to the right
           - If next is also WHITE: count WHITE pixels to the LEFT until black or previous baseline
@@ -120,21 +205,25 @@ class AmplitudeExtractor:
             error_message(self.console, f"Error extracting amplitude: {str(e)}")
             return None
 
-
     def process_amplitudes(self, amplitude):
         """Process raw amplitude data through multiple steps"""
         try:
             # Store raw amplitude for visualization
             #self.intermediate_results['raw'] = amplitude.copy()
+            
+            # 1. Replace zeros with trace means
+            #processed = self._interpolate_zeros(amplitude)
+            #self._save_array(processed, "amplitude_zeros_interpolated")
+            #self.intermediate_results['zeros_interpolated'] = processed.copy()
 
             processed = amplitude.copy()
 
-            # 1. Handle clipped values
+            # 2. Handle clipped values
             processed = self._handle_clipping(processed)
             #self._save_array(processed, "amplitude_clipping_handled")
             #self.intermediate_results['clipping_handled'] = processed.copy()
 
-            # 2. Final smoothing
+            # 3. Final smoothing
             processed = self._apply_smoothing(processed)
             #self._save_array(processed, "amplitude_final")
             #self.intermediate_results['final'] = processed.copy() 
@@ -145,6 +234,29 @@ class AmplitudeExtractor:
             error_message(self.console, f"Error processing amplitudes: {str(e)}")
             return None
 
+    def _interpolate_zeros(self, amplitude):
+        """Replace zero values with trace means"""
+        info_message(self.console, "Interpolating zero values...")
+        self.progress.start("Interpolating zeros...", amplitude.shape[1])
+
+        try:
+            processed = amplitude.copy()
+            trace_means = np.mean(processed, axis=0)
+
+            for i in range(processed.shape[1]):
+                zero_indices = processed[:, i] == 0
+                processed[zero_indices, i] = -(2*trace_means[i])
+                self.progress.update(i)
+                
+                if self.progress.wasCanceled():
+                    return None
+
+            self.progress.finish()
+            return processed
+
+        except Exception as e:
+            error_message(self.console, f"Error interpolating zeros: {str(e)}")
+            return None
 
     def _handle_clipping(self, amplitude):
         """Handle clipped values using Akima interpolation"""
@@ -236,4 +348,3 @@ class AmplitudeExtractor:
         except Exception as e:
             error_message(self.console, f"Error saving array {name}: {str(e)}")
 
-    
