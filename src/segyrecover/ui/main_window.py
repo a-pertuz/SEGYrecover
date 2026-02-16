@@ -30,7 +30,7 @@ from ._0_welcome_tab import WelcomeTab
 from ._1_load_image_tab import LoadImageTab
 from ._2_parameters_tab import ParametersTab
 from ._3_roi_selection_tab import ROISelectionTab
-from ._4_digitization_tab import DigitizationTab
+from ._4_vectorization_tab import vectorizationTab
 from ._5_results_tab import ResultsTab
 
 class ProgressStatusBar(QStatusBar):
@@ -222,14 +222,14 @@ class SegyRecover(QMainWindow):
         # ROI Selection tab
         roi_selection_tab = ROISelectionTab(self.console, self.work_dir)
         roi_selection_tab.roiSelected.connect(self.handle_roi_selected)
-        roi_selection_tab.proceedRequested.connect(lambda: self.proceed_to_tab("digitization"))
+        roi_selection_tab.proceedRequested.connect(lambda: self.proceed_to_tab("vectorization"))
         self.tab_container.add_tab("roi_selection", roi_selection_tab)
         
-        # Digitization tab
-        digitization_tab = DigitizationTab(self.console, self.progress, self.work_dir)
-        digitization_tab.digitizationCompleted.connect(self.handle_digitization_completed)
-        digitization_tab.proceedRequested.connect(lambda: self.proceed_to_tab("results"))
-        self.tab_container.add_tab("digitization", digitization_tab)
+        # vectorization tab
+        vectorization_tab = vectorizationTab(self.console, self.progress, self.work_dir)
+        vectorization_tab.vectorizationCompleted.connect(self.handle_vectorization_completed)
+        vectorization_tab.proceedRequested.connect(lambda: self.proceed_to_tab("results"))
+        self.tab_container.add_tab("vectorization", vectorization_tab)
         
         # Results tab
         results_tab = ResultsTab(self.console, self.work_dir)
@@ -256,10 +256,10 @@ class SegyRecover(QMainWindow):
         if hasattr(roi_selection_tab, "reset"):
             roi_selection_tab.reset()
             
-        # Reset the digitization tab
-        digitization_tab = self.tab_container.widget(self.tab_container.tab_indices["digitization"])
-        if hasattr(digitization_tab, "reset"):
-            digitization_tab.reset()
+        # Reset the vectorization tab
+        vectorization_tab = self.tab_container.widget(self.tab_container.tab_indices["vectorization"])
+        if hasattr(vectorization_tab, "reset"):
+            vectorization_tab.reset()
             
         # Reset the results tab
         results_tab = self.tab_container.widget(self.tab_container.tab_indices["results"])
@@ -291,10 +291,10 @@ class SegyRecover(QMainWindow):
             if hasattr(roi_tab, "update_with_image"):
                 roi_tab.update_with_image(self.image_path, self.img_array)
         
-        elif tab_id == "digitization" and self.binary_rectified_image is not None and self.parameters:
-            digitization_tab = self.tab_container.widget(self.tab_container.tab_indices["digitization"])
-            if hasattr(digitization_tab, "update_with_data"):
-                digitization_tab.update_with_data(
+        elif tab_id == "vectorization" and self.binary_rectified_image is not None and self.parameters:
+            vectorization_tab = self.tab_container.widget(self.tab_container.tab_indices["vectorization"])
+            if hasattr(vectorization_tab, "update_with_data"):
+                vectorization_tab.update_with_data(
                     self.image_path,
                     self.binary_rectified_image,
                     self.parameters
@@ -317,10 +317,10 @@ class SegyRecover(QMainWindow):
         """Handle ROI selected signal from ROISelectionTab."""
         self.points = points
         self.binary_rectified_image = binary_rectified_image
-        self.navigation_panel.enable_tabs_until("digitization")
+        self.navigation_panel.enable_tabs_until("vectorization")
     
-    def handle_digitization_completed(self, segy_path, filtered_data):
-        """Handle digitization completed signal from DigitizationTab."""
+    def handle_vectorization_completed(self, segy_path, filtered_data):
+        """Handle vectorization completed signal from vectorizationTab."""
         # Enable navigation to next step
         self.navigation_panel.enable_tabs_until("results")
         

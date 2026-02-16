@@ -143,7 +143,7 @@ class ParametersTab(QWidget):
         
         # Instruction text
         instruction = QLabel(
-            "Configure the parameters used for digitization. Parameters are automatically loaded "
+            "Configure the parameters used for vectorization. Parameters are automatically loaded "
             "if a matching .par file exists in the PARAMETERS folder. Click 'Save Parameters' before proceeding."
         )
         instruction.setWordWrap(True)
@@ -457,7 +457,7 @@ class ParametersTab(QWidget):
         # Add description
         detection_description = QLabel(
             "Configure parameters for detecting trace baselines and timelines in the seismic image.\n"
-            "These parameters control how the digitization algorithm identifies and processes features in the image."
+            "These parameters control how the vectorization algorithm identifies and processes features in the image."
         )
         detection_description.setObjectName("parameter_description")
         detection_description.setWordWrap(True)

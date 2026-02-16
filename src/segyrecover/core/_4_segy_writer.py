@@ -161,7 +161,7 @@ class SegyFileWriter:
             for i in range(40):  # SEGY standard: 40 lines of 80 characters
                 txt_header.append('' * 80)  # Initialize with spaces
 
-            txt_header[0] = f'{"SEGY FILE DIGITIZED BY SEGYRECOVER":<80}'
+            txt_header[0] = f'{"SEGY FILE VECTORIZED BY SEGYRECOVER":<80}'
             txt_header[1] = f'{"ORIGINAL IMAGE: " + os.path.basename(image_path):<80}'
             txt_header[2] = f'{"SAMPLE INTERVAL: " + str(DT) + " MS":<80}'
             txt_header[3] = f'{"TRACES: " + str(nt) + ", SAMPLES: " + str(ns):<80}'

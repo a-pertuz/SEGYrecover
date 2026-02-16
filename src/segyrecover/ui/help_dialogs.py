@@ -59,7 +59,7 @@ class AboutDialog(QDialog):
         
         # Description text with better styling
         description = QLabel(
-            "A Python tool for digitizing scanned seismic sections\n"
+            "A Python tool for vectorizing scanned seismic sections\n"
             "and converting them to standard SEGY format."
         )
         description.setAlignment(Qt.AlignCenter)
@@ -143,7 +143,7 @@ class HelpDialog(QDialog):
         intro_layout.addWidget(intro_title)
         
         intro_text = QLabel(
-            "<p><b>SEGYRecover</b> is a comprehensive tool designed to digitize seismic images into SEGY format. "
+            "<p><b>SEGYRecover</b> is a comprehensive tool designed to vectorize seismic images into SEGY format. "
             "This guide will help you use the application effectively.</p>"
         )
         intro_text.setTextFormat(Qt.RichText)
@@ -185,12 +185,12 @@ class HelpDialog(QDialog):
         workflow_layout.addWidget(workflow_title)
         
         workflow_text = QLabel(
-            "<p>The application follows a step-by-step process through a series of tabs to digitize and rectify seismic images:</p>"
+            "<p>The application follows a step-by-step process through a series of tabs to vectorize and rectify seismic images:</p>"
             
             "<h4 style='margin-top: 15px; margin-bottom: 6px;'>Welcome Tab</h4>"
             "<ul style='margin-top: 0px;'>"
             "<li>View basic information about SEGYRecover</li>"
-            "<li>Click the \"Start New Line\" button to begin the digitization process</li>"
+            "<li>Click the \"Start New Line\" button to begin the vectorization process</li>"
             "</ul>"
             
             "<h4 style='margin-top: 15px; margin-bottom: 6px;'>1. Load Image Tab</h4>"
@@ -236,13 +236,13 @@ class HelpDialog(QDialog):
             "<li>Use the navigation toolbar to zoom for accurate point selection</li>"
             "<li>The fourth corner will be calculated automatically</li>"
             "<li>The selected region will be rectified and displayed in the right panel</li>"
-            "<li>Click \"Next\" to move to the Digitization tab</li>"
+            "<li>Click \"Next\" to move to the vectorization tab</li>"
             "</ul>"
             
-            "<h4 style='margin-top: 15px; margin-bottom: 6px;'>4. Digitization Tab</h4>"
+            "<h4 style='margin-top: 15px; margin-bottom: 6px;'>4. vectorization Tab</h4>"
             "<ul style='margin-top: 0px;'>"
             "<li>View the processing steps visually represented at the top of the tab</li>"
-            "<li>Click \"Start Digitization\" to begin processing</li>"
+            "<li>Click \"Start vectorization\" to begin processing</li>"
             "<li>The process will proceed through these steps automatically:"
             "<ol>"
             "<li>Timeline Removal</li>"
@@ -258,7 +258,7 @@ class HelpDialog(QDialog):
             
             "<h4 style='margin-top: 15px; margin-bottom: 6px;'>5. Results Tab</h4>"
             "<ul style='margin-top: 0px;'>"
-            "<li>Displays the digitized SEGY section in the left panel</li>"
+            "<li>Displays the vectorized SEGY section in the left panel</li>"
             "<li>Shows the average amplitude spectrum in the right panel</li>"
             "<li>Change display type using the dropdown (Variable Density/Wiggle)</li>"
             "<li>View file information including size and dimensions</li>"

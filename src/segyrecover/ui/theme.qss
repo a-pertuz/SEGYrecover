@@ -126,7 +126,7 @@ QMenu::item:disabled {
 
 /* Consistent Styling for All Tabs */
 #welcome_tab, #load_image_tab, #parameters_tab, 
-#roi_selection_tab, #digitization_tab, #results_tab {
+#roi_selection_tab, #vectorization_tab, #results_tab {
     background-color: #ffffff;
     padding: 20px;
 }
@@ -179,7 +179,7 @@ QGroupBox {
     margin-top: 10px;
     padding-top: 15px;
     font-weight: bold;
-    font-size: 12pt;
+    font-size: 13pt;
     color: #2d3748;
 }
 
@@ -247,7 +247,7 @@ QLabel[objectName^="bullet_"] {
 
 QLabel[objectName^="feature_"], QLabel[objectName="workflow_steps"], QLabel[objectName="features_label"] {
     color: #2d3748;
-    font-size: 11pt;
+    font-size: 12pt;
 }
 
 /* Button styling */
@@ -342,7 +342,7 @@ QPushButton[text="Proceed to Results"]:disabled {
 QPushButton[objectName="load_button"],
 QPushButton[text="Save Parameters"],
 QPushButton[text="Load Image"],
-QPushButton[text="Start Digitization"]
+QPushButton[text="Start vectorization"]
  {
     background-color: #3182ce;
     color: white;
@@ -355,14 +355,14 @@ QPushButton[text="Start Digitization"]
 QPushButton[objectName="load_button"]:hover,
 QPushButton[text="Load Image"]:hover,
 QPushButton[text="Save Parameters"]:hover,
-QPushButton[text="Start Digitization"]:hover {
+QPushButton[text="Start vectorization"]:hover {
     background-color: #2b6cb0;
 }
 
 QPushButton[objectName="load_button"]:pressed,
 QPushButton[text="Load Image"]:pressed,
 QPushButton[text="Save Parameters"]:pressed,
-QPushButton[text="Start Digitization"]:pressed {
+QPushButton[text="Start vectorization"]:pressed {
     background-color: #2c5282;
 }
 
@@ -401,7 +401,7 @@ QTextEdit:focus, QPlainTextEdit:focus {
     border-radius: 4px;
     padding: 10px;
     font-family: "Consolas", "Monaco", monospace;
-    font-size: 9pt;
+    font-size: 11pt;
     color: #2d3748;
     margin: 8px;
 }

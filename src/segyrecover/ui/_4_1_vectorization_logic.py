@@ -1,4 +1,4 @@
-"""Digitization logic for SEGYRecover application."""
+"""vectorization logic for SEGYRecover application."""
 
 import os
 import numpy as np
@@ -13,8 +13,8 @@ from ..utils.console_utils import (
     summary_statistics
 )
 
-class DigitizationProcessor:
-    """Handles the digitization processing workflow for seismic images."""
+class VectorizationProcessor:
+    """Handles the vectorization processing workflow for seismic images."""
     
     def __init__(self, console, progress_bar, work_dir):
         """Initialize the processor with the necessary components."""
@@ -76,13 +76,13 @@ class DigitizationProcessor:
         for key in self.processing_results:
             self.processing_results[key] = None
     
-    def run_digitization(self, step_callback=None):
-        """ Run the complete digitization process. """
+    def run_vectorization(self, step_callback=None):
+        """ Run the complete vectorization process. """
 
         if not self._validate_inputs():
             return False
         
-        section_header(self.console, "DIGITIZATION PROCESS")
+        section_header(self.console, "vectorizATION PROCESS")
         
         try:
             # Step 1: Remove timelines
@@ -127,7 +127,7 @@ class DigitizationProcessor:
             
         except Exception as e:
             import traceback
-            error_message(self.console, f"Digitization failed: {str(e)}")
+            error_message(self.console, f"vectorization failed: {str(e)}")
             error_message(self.console, traceback.format_exc())
             return False
     
@@ -279,7 +279,7 @@ class DigitizationProcessor:
         return True
     
     def _display_completion_summary(self):
-        """Display a summary of the digitization results."""
+        """Display a summary of the vectorization results."""
         if self.filtered_data is None or self.segy_path is None:
             return
             
@@ -294,7 +294,7 @@ class DigitizationProcessor:
             "File size": f"{os.path.getsize(self.segy_path) / (1024*1024):.2f} MB"
         })
 
-        success_message(self.console, "Digitization completed successfully!")
+        success_message(self.console, "vectorization completed successfully!")
 
     
     def get_results(self):

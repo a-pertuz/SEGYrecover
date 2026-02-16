@@ -6,9 +6,9 @@
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-green.svg)](https://www.gnu.org/licenses/gpl-3.0.en.html)
 [![Python Version](https://img.shields.io/badge/Python-3.12+-yellow)](https://www.python.org/downloads/)
 
-A Python tool for digitizing scanned seismic reflection sections and converting them to standard SEG-Y format. SEGYRecover automatically removes timelines, detects trace baselines, extracts amplitude information for each trace, and produces usable SEG-Y files for modern interpretation software.
+A Python tool for vectorizing scanned seismic reflection sections and converting them to standard SEG-Y format. SEGYRecover automatically removes timelines, detects trace baselines, extracts amplitude information for each trace, and produces usable SEG-Y files for modern interpretation software.
 
-SEGYRecover is part of a collection of open source tools to digitize and enhance vintage seismic sections. See https://a-pertuz.github.io/REVSEIS/ for more information.
+SEGYRecover is part of a collection of open source tools to vectorize and enhance vintage seismic sections. See https://a-pertuz.github.io/REVSEIS/ for more information.
 
 <details open>
 <summary><h2>📖 Table of Contents</h2></summary>
@@ -29,13 +29,13 @@ SEGYRecover is part of a collection of open source tools to digitize and enhance
 <details open>
 <summary><h2>✨ Features</h2></summary>
 
-- **Digitization of seismic images** - Convert paper/raster seismic sections into SEGY files compatible with modern interpretation software
-- **User-friendly GUI** - Simple interface for the entire digitization workflow
+- **Vectorization of seismic images** - Convert paper/raster seismic sections into SEGY files compatible with modern interpretation software
+- **User-friendly GUI** - Simple interface for the entire vectorization workflow
 - **Perspective correction** - Handles skewed or distorted scanned images
-- **Automatic trace line detection** - Identifies and digitized individual traces, preserving the original number of traces
+- **Automatic trace line detection** - Identifies and vectorized individual traces, preserving the original number of traces
 - **Timeline detection and removal** - Detects and removes horizontal timelines
 - **Amplitude extraction** - Converts pixel density to the right of each trace to seismic amplitude values for each trace
-- **Frequency filtering** - Apply bandpass filters to clean up digitized data
+- **Frequency filtering** - Apply bandpass filters to clean up vectorized data
 - **Geospatial referencing** - Associates traces with real-world coordinates
 
 </details>
@@ -148,7 +148,7 @@ segyrecover/
 2. **Load** → Select your seismic image file
 3. **Configure** → Set parameters (trace coordinates, sample rate, frequency band)
 4. **Select** → Mark three corners of your seismic section (ROI)
-5. **Process** → Click "Start Digitization" and wait for completion
+5. **Process** → Click "Start vectorization" and wait for completion
 
 Your SEG-Y file will be saved in the `SEGY` folder and can be loaded into interpretation software.
 
@@ -222,7 +222,7 @@ Map image pixels to seismic coordinates:
 
 ![ROI Selection](images/sr_roi.png)
 
-Mark three corners to define the digitization area:
+Mark three corners to define the vectorization area:
 
 1. You're automatically taken to ROI Selection after parameters
 2. Image displays with corner point selection prompt
@@ -236,7 +236,7 @@ Mark three corners to define the digitization area:
 7. Repeat for **bottom-left** corner
 8. Fourth corner calculates automatically
 9. Verify result and click "Accept"
-10. Click "Next" for Digitization
+10. Click "Next" for vectorization
 
 > **Note**: ROI points save automatically for future reuse
 
@@ -244,7 +244,7 @@ Mark three corners to define the digitization area:
 
 Automatic processing workflow:
 
-1. Click **"Start Digitization"** to begin
+1. Click **"Start vectorization"** to begin
 2. Monitor console for step-by-step progress
 3. Select CDP direction when prompted
 4. Review processing in visualization window
@@ -288,17 +288,17 @@ Automatic processing workflow:
 
 ![Results View](images/sr_results.png)
 
-View and analyze your digitized data:
+View and analyze your vectorized data:
 
-1. Digitized SEG-Y section displays in main view
+1. vectorized SEG-Y section displays in main view
 2. Amplitude spectrum shows frequency content
-3. Console provides digitization summary
+3. Console provides vectorization summary
 4. Additional processing options are available via buttons
 5. Click "Start New Line" for next image
 
 #### Additional Processing Options
 
-The Results tab provides several buttons for further processing and editing of your digitized SEG-Y data:
+The Results tab provides several buttons for further processing and editing of your vectorized SEG-Y data:
 
 **Edit SEGY Header**
 - Modify SEGY file headers including acquisition parameters and metadata
@@ -370,7 +370,7 @@ Check `LOG` folder for detailed process logs and error messages.
 Currently processes one image at a time. Use "Start New Line" sequentially and save parameters for similar images.
 
 **No geometry data?**
-Still digitizable but SEG-Y lacks real-world coordinates. Create placeholder file with first/last CDP numbers and arbitrary coordinates.
+Still vectorizable but SEG-Y lacks real-world coordinates. Create placeholder file with first/last CDP numbers and arbitrary coordinates.
 
 **Color images supported?**
 Works best with black/white images. Convert color seismic to grayscale/binary before processing.
@@ -387,7 +387,7 @@ Works best with black/white images. Convert color seismic to grayscale/binary be
 If you use this software in your research, please cite it as:
 
 ```
-Pertuz, A., Benito, M. I., Llanes, P., Suárez-González, P., & García-Martín, M. (2025a). SEGYRecover: A Python GUI-based tool for digitizing vintage seismic reflection sections into SEG-Y files. Zenodo. https://doi.org/10.5281/zenodo.15053412
+Pertuz, A., Benito, M. I., Llanes, P., Suárez-González, P., & García-Martín, M. (2025a). SEGYRecover: A Python GUI-based tool for vectorizing vintage seismic reflection sections into SEG-Y files. Zenodo. https://doi.org/10.5281/zenodo.15053412
 ```
 
 Find this software in the Zenodo Archive: [https://doi.org/10.5281/zenodo.15053412](https://doi.org/10.5281/zenodo.15053412)

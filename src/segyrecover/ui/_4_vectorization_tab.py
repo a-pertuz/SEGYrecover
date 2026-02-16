@@ -1,4 +1,4 @@
-"""Digitization tab for SEGYRecover application."""
+"""vectorization tab for SEGYRecover application."""
 
 import os
 import numpy as np
@@ -19,7 +19,7 @@ from ..utils.console_utils import (
     section_header, success_message, error_message, 
     warning_message, info_message, progress_message
 )
-from ._4_1_digitization_logic import DigitizationProcessor
+from ._4_1_vectorization_logic import VectorizationProcessor
 
 class SimpleNavigationToolbar(NavigationToolbar):
     """Simplified navigation toolbar with only Home, Pan and Zoom tools."""
@@ -33,22 +33,22 @@ class SimpleNavigationToolbar(NavigationToolbar):
         # Configure the toolbar to show text labels
         self.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
 
-class DigitizationTab(QWidget):
-    """Tab for digitizing the seismic section."""
+class VectorizationTab(QWidget):
+    """Tab for vectorizing the seismic section."""
     
     # Signals
-    digitizationCompleted = Signal(str, object)  # segy_path, filtered_data
+    vectorizationCompleted = Signal(str, object)  # segy_path, filtered_data
     proceedRequested = Signal()
     
     def __init__(self, console, progress_bar, work_dir, parent=None):
         super().__init__(parent)
-        self.setObjectName("digitization_tab")
+        self.setObjectName("vectorization_tab")
         self.console = console
         self.progress = progress_bar
         self.work_dir = work_dir
         
-        # Create the digitization processor for handling the logic
-        self.digitization_processor = DigitizationProcessor(console, progress_bar, work_dir)
+        # Create the vectorization processor for handling the logic
+        self.vectorization_processor = VectorizationProcessor(console, progress_bar, work_dir)
         
         # Visualization state for storing intermediate and final images/data
         self.visualization_data = {
@@ -69,9 +69,9 @@ class DigitizationTab(QWidget):
         self._setup_ui()
     
     def reset(self):
-        """Reset the digitization tab state completely when starting a new line."""
+        """Reset the vectorization tab state completely when starting a new line."""
         # Reset the processor
-        self.digitization_processor.reset()
+        self.vectorization_processor.reset()
         
         # Clear all visualization data
         for key in self.visualization_data:
@@ -103,12 +103,12 @@ class DigitizationTab(QWidget):
         layout.setSpacing(5)
         
         # Header section
-        header = QLabel("Digitization Process")
+        header = QLabel("vectorization Process")
         header.setObjectName("header_label")
         layout.addWidget(header)
         
         # Instruction text
-        instruction = QLabel("Start the digitization process to extract trace data from the seismic section.")
+        instruction = QLabel("Start the vectorization process to extract trace data from the seismic section.")
         instruction.setObjectName("description_label")
         instruction.setWordWrap(True)
         layout.addWidget(instruction)
@@ -140,9 +140,9 @@ class DigitizationTab(QWidget):
         button_layout.addSpacing(10)
         
         # Start button
-        self.start_button = QPushButton("Start Digitization")
-        self.start_button.setObjectName("start_digitization_button")
-        self.start_button.clicked.connect(self.start_digitization)
+        self.start_button = QPushButton("Start vectorization")
+        self.start_button.setObjectName("start_vectorization_button")
+        self.start_button.clicked.connect(self.start_vectorization)
         button_layout.addWidget(self.start_button)
         
         # Add spacing between buttons
@@ -257,8 +257,8 @@ class DigitizationTab(QWidget):
                 
                 ax.set_title("Baselines Detection")
                 
-                if self.digitization_processor.final_baselines is not None:
-                    for baseline in self.digitization_processor.final_baselines:
+                if self.vectorization_processor.final_baselines is not None:
+                    for baseline in self.vectorization_processor.final_baselines:
                         ax.axvline(x=baseline, color='red', linewidth=1)
                 
                 self._apply_zoom_to_center(ax, data.shape)
@@ -271,10 +271,10 @@ class DigitizationTab(QWidget):
                 ax.set_xlabel("Trace")
                 ax.set_ylabel("Time (ms)")
                 
-                if self.digitization_processor.parameters:
+                if self.vectorization_processor.parameters:
                     time_ticks = np.linspace(0, data.shape[0]-1, 5)
-                    time_labels = np.linspace(self.digitization_processor.parameters.get("TWT_P1", 0), 
-                                            self.digitization_processor.parameters.get("TWT_P3", 1000), 5).astype(int)
+                    time_labels = np.linspace(self.vectorization_processor.parameters.get("TWT_P1", 0), 
+                                            self.vectorization_processor.parameters.get("TWT_P3", 1000), 5).astype(int)
                     ax.set_yticks(time_ticks)
                     ax.set_yticklabels(time_labels)
                 
@@ -320,33 +320,33 @@ class DigitizationTab(QWidget):
         ax.set_xlim(x_min, x_max)
         ax.set_ylim(y_max, y_min)  # Reversed for image convention
     
-    def start_digitization(self):
-        """Start the digitization process."""
+    def start_vectorization(self):
+        """Start the vectorization process."""
         # Validate that parameters and image are set before running
-        if not self.digitization_processor.parameters or len(self.digitization_processor.parameters) == 0:
+        if not self.vectorization_processor.parameters or len(self.vectorization_processor.parameters) == 0:
             QMessageBox.warning(self, "Warning", "Please set processing parameters first.")
-            error_message(self.console, "Digitization aborted: No parameters set.")
+            error_message(self.console, "vectorization aborted: No parameters set.")
             return
 
-        if self.digitization_processor.binary_rectified_image is None:
+        if self.vectorization_processor.binary_rectified_image is None:
             QMessageBox.warning(self, "Warning", "Please load an image and select ROI first.")
-            error_message(self.console, "Digitization aborted: No rectified image.")
+            error_message(self.console, "vectorization aborted: No rectified image.")
             return
         
         # Disable start button to prevent multiple runs
         self.start_button.setEnabled(False)
         
-        # Run the digitization process with step callbacks for UI updates
-        success = self.digitization_processor.run_digitization(self._step_completed_callback)
+        # Run the vectorization process with step callbacks for UI updates
+        success = self.vectorization_processor.run_vectorization(self._step_completed_callback)
         
         if success:
             self._add_success_overlay()  # Show success message on filtered data tab
             self.see_results_button.setEnabled(True)  # Enable next button
             
             # Emit signal with results
-            self.digitizationCompleted.emit(
-                self.digitization_processor.segy_path, 
-                self.digitization_processor.filtered_data
+            self.vectorizationCompleted.emit(
+                self.vectorization_processor.segy_path, 
+                self.vectorization_processor.filtered_data
             )
           # Re-enable start button for optional re-run
         self.start_button.setEnabled(True)
@@ -376,15 +376,15 @@ class DigitizationTab(QWidget):
             self.tab_canvases['filtered_data'].draw()
     
     def update_with_data(self, image_path, binary_rectified_image, parameters):
-        """Update with data from previous tabs and enable digitization if ready."""
-        self.digitization_processor.set_data(image_path, binary_rectified_image, parameters)
+        """Update with data from previous tabs and enable vectorization if ready."""
+        self.vectorization_processor.set_data(image_path, binary_rectified_image, parameters)
         
         self.visualization_data['image_input'] = binary_rectified_image
         
         if binary_rectified_image is not None:
             self._update_visualization_tab('original', binary_rectified_image)
             
-            info_message(self.console, "Rectified image loaded for digitization")
+            info_message(self.console, "Rectified image loaded for vectorization")
             info_message(self.console, f"Parameters loaded: {len(parameters)} parameters")
             self.start_button.setEnabled(True)
         else:

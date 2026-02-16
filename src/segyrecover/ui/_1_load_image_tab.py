@@ -75,7 +75,7 @@ class LoadImageTab(QWidget):
         
         # Instruction text
         instruction = QLabel(
-            "Select a seismic image file (TIFF, JPEG, PNG) to begin the digitization process.\n"
+            "Select a seismic image file (TIFF, JPEG, PNG) to begin the vectorization process.\n"
             "The corresponding geometry file from the GEOMETRY folder will be loaded automatically if available."
         )
         instruction.setObjectName("description_label")

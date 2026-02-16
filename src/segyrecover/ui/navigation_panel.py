@@ -85,7 +85,7 @@ class NavigationPanel(QWidget):
             ("Image Loading", "image_loading"),
             ("Parameters", "parameters"),
             ("ROI Selection", "roi_selection"),
-            ("Digitization", "digitization"),
+            ("vectorization", "vectorization"),
             ("Results", "results")
         ]
         

@@ -96,7 +96,7 @@ class ROISelectionTab(QWidget):
         self.status_label.setObjectName("status_label")
         layout.addWidget(self.status_label)
         
-        # Create visualization tabs container - similar to digitization tab
+        # Create visualization tabs container 
         visualization_container = QGroupBox("Image Processing")
         visualization_container.setObjectName("visualization_container")
         visualization_layout = QVBoxLayout(visualization_container)

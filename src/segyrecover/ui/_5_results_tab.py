@@ -33,7 +33,7 @@ class SimpleNavigationToolbar(NavigationToolbar):
         self.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
 
 class ResultsTab(QWidget):
-    """Tab for displaying results of the digitization process."""
+    """Tab for displaying results of the vectorization process."""
     
     # Signals
     newLineRequested = Signal()
@@ -102,7 +102,7 @@ class ResultsTab(QWidget):
         
         # Instruction text
         instruction = QLabel(
-            "You can review the digitized seismic data and its amplitude spectrum below. "
+            "You can review the vectorized seismic data and its amplitude spectrum below. "
             "Use the buttons to edit the SEGY header, mute topography, apply AGC RMS, "
             "or apply trace mixing to the seismic data."
         )
@@ -115,7 +115,7 @@ class ResultsTab(QWidget):
         splitter.setHandleWidth(6)  
         
         # Left panel - SEGY display (wider)
-        segy_container = QGroupBox("Digitized SEGY")
+        segy_container = QGroupBox("vectorized SEGY")
         segy_container.setObjectName("segy_container")
         segy_layout = QVBoxLayout(segy_container)
         segy_layout.setContentsMargins(15, 15, 15, 15)
@@ -215,7 +215,7 @@ class ResultsTab(QWidget):
     
     
     def display_results(self, segy_path, filtered_data, dt):
-        """Display results from the digitization process."""
+        """Display results from the vectorization process."""
 
         self.filtered_data = filtered_data
         self.dt = dt

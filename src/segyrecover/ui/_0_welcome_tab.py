@@ -76,7 +76,7 @@ class WelcomeTab(QWidget):
         
         # Description section
         description = QLabel(
-            "SEGYRecover digitizes scanned seismic sections into standard "
+            "SEGYRecover vectorizes scanned seismic sections into standard "
             "SEGY format for use in modern interpretation software."
         )
         description.setObjectName("description_label")
@@ -119,7 +119,7 @@ class WelcomeTab(QWidget):
             "2. Load your seismic image (from IMAGES folder)\n"
             "3. Configure parameters or use saved ones\n"
             "4. Select your region of interest\n"
-            "5. Run the digitization process\n"
+            "5. Run the vectorization process\n"
             "6. Export and use your SEGY file"
         )
         workflow_text.setObjectName("workflow_steps")

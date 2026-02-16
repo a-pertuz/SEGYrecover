@@ -73,7 +73,7 @@ class CoordinateAssignmentDialog(QDialog):
         # Add info label
         info_label = QLabel(
             "Select the direction to assign coordinates to traces.\n"
-            "This defines how CDP points from the geometry file are mapped to the digitized traces."
+            "This defines how CDP points from the geometry file are mapped to the vectorized traces."
         )
         info_label.setWordWrap(True)
         layout.addWidget(info_label)
