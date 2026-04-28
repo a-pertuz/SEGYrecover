@@ -30,7 +30,7 @@ from ._0_welcome_tab import WelcomeTab
 from ._1_load_image_tab import LoadImageTab
 from ._2_parameters_tab import ParametersTab
 from ._3_roi_selection_tab import ROISelectionTab
-from ._4_vectorization_tab import vectorizationTab
+from ._4_vectorization_tab import VectorizationTab
 from ._5_results_tab import ResultsTab
 
 class ProgressStatusBar(QStatusBar):
@@ -226,7 +226,7 @@ class SegyRecover(QMainWindow):
         self.tab_container.add_tab("roi_selection", roi_selection_tab)
         
         # vectorization tab
-        vectorization_tab = vectorizationTab(self.console, self.progress, self.work_dir)
+        vectorization_tab = VectorizationTab(self.console, self.progress, self.work_dir)
         vectorization_tab.vectorizationCompleted.connect(self.handle_vectorization_completed)
         vectorization_tab.proceedRequested.connect(lambda: self.proceed_to_tab("results"))
         self.tab_container.add_tab("vectorization", vectorization_tab)
@@ -320,7 +320,7 @@ class SegyRecover(QMainWindow):
         self.navigation_panel.enable_tabs_until("vectorization")
     
     def handle_vectorization_completed(self, segy_path, filtered_data):
-        """Handle vectorization completed signal from vectorizationTab."""
+        """Handle vectorization completed signal from VectorizationTab."""
         # Enable navigation to next step
         self.navigation_panel.enable_tabs_until("results")
         
